@@ -18,7 +18,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/datamodels"]
+packages = ["datamodels"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
