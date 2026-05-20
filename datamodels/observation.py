@@ -9,7 +9,8 @@ class Info(BaseModel):
 
     obs_id: str
     date_obs: datetime
-    oca_jd: int
+    jd_date_obs: float
+    oca_night: int
 
 
 class Measurement(BaseModel):
