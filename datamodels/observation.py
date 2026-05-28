@@ -28,6 +28,12 @@ class File(BaseModel):
     header: dict | None = None
     measurements: list[Measurement] = Field(default_factory=list)
 
+    async def get_measurement(self, category: str) -> Optional[Measurement]:
+        for measurement in self.measurements:
+            if measurement.category == category:
+                return measurement
+        return None
+
 
 class Observation(BaseModel):
     model_config = ConfigDict(extra="allow")
