@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -37,3 +37,16 @@ class Observation(BaseModel):
     objects: dict[str, Any] = Field(default_factory=dict)
     files: list[File] = Field(default_factory=list)
     measurements: list[Measurement] = Field(default_factory=list)
+
+    async def get_measurement(self, category: str) -> Optional[Measurement]:
+        for measurement in self.measurements:
+            if measurement.category == category:
+                return measurement
+        return None
+
+    async def get_file(self, category: str) -> Optional[File]:
+        for file in self.files:
+            if file.category == category:
+                return file
+        return None
+
