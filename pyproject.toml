@@ -12,7 +12,7 @@ dependencies = [
     "pydantic>=2.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8.0",
 ]
@@ -22,3 +22,6 @@ packages = ["datamodels"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.uv]
+default-groups = ["dev"]
