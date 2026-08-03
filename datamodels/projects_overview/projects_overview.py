@@ -1,10 +1,10 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class Status(str, Enum):
+class Status(StrEnum):
     ONGOING = "ongoing"
     PAUSED = "paused"
     HALTED = "halted"
