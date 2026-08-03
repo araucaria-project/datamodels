@@ -10,8 +10,8 @@ It has no runtime logic beyond the models themselves — no CLI, no service, no 
 Consumers construct these models from JSON produced elsewhere in the TACOSS pipeline. There are
 currently two independent model modules:
 
-- `datamodels/observation.py` — a single observation's data (files, measurements, quality checks).
-- `datamodels/projects_overview.py` — a processing run's overview of projects/objects and their
+- `datamodels/observation/observation.py` — a single observation's data (files, measurements, quality checks).
+- `datamodels/projects_overview/projects_overview.py` — a processing run's overview of projects/objects and their
   statuses.
 
 ## Commands
