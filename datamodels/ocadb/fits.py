@@ -5,13 +5,12 @@ These are plain pydantic models only — no ODM (Beanie/Mongo) or web-framework
 subclass FITSFile together with their own Document base class locally, rather
 than extending this module with storage-specific behavior.
 """
-import types
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Any, Dict, List, Optional, Union, get_args, get_origin
+from typing import Annotated, Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field
 
 
 class StorageStatusType(str, Enum):
@@ -58,16 +57,6 @@ DigestStr = Annotated[
 ]
 
 
-def _unwrap_optional(annotation):
-    """Strip an Optional[...] / X | None wrapper down to the inner type."""
-    origin = get_origin(annotation)
-    if origin is Union or origin is getattr(types, "UnionType", None):
-        args = [a for a in get_args(annotation) if a is not type(None)]
-        if len(args) == 1:
-            return args[0]
-    return annotation
-
-
 def _coerce_int(value):
     if isinstance(value, str):
         try:
@@ -87,112 +76,82 @@ def _coerce_float(value):
 
 
 def _coerce_str(value):
-    if value is None:
-        return None
-    if not isinstance(value, str):
-        return str(value)
-    return value
+    if value is None or isinstance(value, str):
+        return value
+    return str(value)
 
 
-_COERCERS = {
-    int: _coerce_int,
-    float: _coerce_float,
-    str: _coerce_str,
-}
+# FITS header keywords are frequently the "wrong" type (e.g. a numeric
+# keyword serialized as a string). These annotated types coerce leniently
+# (falling back to None on bad input) instead of raising a validation error.
+LenientInt = Annotated[Optional[int], BeforeValidator(_coerce_int)]
+LenientFloat = Annotated[Optional[float], BeforeValidator(_coerce_float)]
+LenientStr = Annotated[Optional[str], BeforeValidator(_coerce_str)]
 
 
 class FitsHeader(BaseModel):
-    """Direct mapping of FITS header keywords (exact field names).
-
-    Values coming from a raw FITS header are frequently the "wrong" type
-    for their field (e.g. a numeric keyword serialized as a string). Rather
-    than hand-maintaining separate lists of field names per target type,
-    `_coerce_by_annotation` below coerces every field generically based on
-    its own type annotation, so a field can never fall out of sync with its
-    own declared type.
-    """
+    """Direct mapping of FITS header keywords (exact field names)."""
     SIMPLE: Optional[bool] = None
-    BITPIX: Optional[int] = None
-    NAXIS: Optional[int] = None
-    NAXIS1: Optional[int] = None
-    NAXIS2: Optional[int] = None
-    OCASTD: Optional[str] = None
-    OBSERVAT: Optional[str] = None
-    OBS_LAT: Optional[float] = Field(None, alias="OBS-LAT")
-    OBS_LONG: Optional[float] = Field(None, alias="OBS-LONG")
-    OBS_ELEV: Optional[int] = Field(None, alias="OBS-ELEV")
-    ORIGIN: Optional[str] = None
-    TELESCOP: Optional[str] = None
-    DATE_OBS: Optional[str] = Field(None, alias="DATE-OBS")
-    JD: Optional[float] = None
-    RA: Optional[float] = None
-    DEC: Optional[float] = None
-    EQUINOX: Optional[str] = None
-    RA_OBJ: Optional[str] = None
-    DEC_OBJ: Optional[str] = None
-    RA_TEL: Optional[float] = None
-    DEC_TEL: Optional[float] = None
-    ALT_TEL: Optional[float] = None
-    AZ_TEL: Optional[float] = None
-    AIRMASS: Optional[float] = None
-    OBSMODE: Optional[str] = None
-    FOCUS: Optional[int] = None
-    ROTATOR: Optional[float] = None
-    OBSERVER: Optional[str] = None
-    IMAGETYP: Optional[str] = None
-    OBSTYPE: Optional[str] = None
-    OBJECT: Optional[str] = None
-    OBS_PROG: Optional[str] = Field(None, alias="OBS-PROG")
-    NLOOPS: Optional[int] = None
-    LOOP: Optional[int] = None
-    FILTER: Optional[str] = None
-    EXPTIME: Optional[float] = None
-    INSTRUME: Optional[str] = None
-    CCD_TEMP: Optional[float] = Field(None, alias="CCD-TEMP")
-    SET_TEMP: Optional[str] = Field(None, alias="SET-TEMP")
-    XBINNING: Optional[int] = None
-    YBINNING: Optional[int] = None
-    READ_MOD: Optional[int] = Field(None, alias="READ-MOD")
-    GAIN_MOD: Optional[int] = Field(None, alias="GAIN-MOD")
-    GAIN: Optional[float] = None
-    RON: Optional[float] = None
-    SUBRASTR: Optional[str] = None
-    SCALE: Optional[float] = None
-    SATURATE: Optional[str] = None
-    PIERSIDE: Optional[int] = None
-    FLAT_ERA: Optional[int] = None
-    ZERO_ERA: Optional[int] = None
-    DARK_ERA: Optional[int] = None
-    TEST: Optional[int] = None
-    CCD_BLCL: Optional[str] = Field(None, alias="CCD-BLCL")
-    CCD_SCMP: Optional[str] = Field(None, alias="CCD-SCMP")
-    CCD_PORT: Optional[str] = Field(None, alias="CCD-PORT")
-    CCD_VSSP: Optional[str] = Field(None, alias="CCD-VSSP")
-    BZERO: Optional[int] = None
-    PI: Optional[str] = None
+    BITPIX: LenientInt = None
+    NAXIS: LenientInt = None
+    NAXIS1: LenientInt = None
+    NAXIS2: LenientInt = None
+    OCASTD: LenientStr = None
+    OBSERVAT: LenientStr = None
+    OBS_LAT: LenientFloat = Field(None, alias="OBS-LAT")
+    OBS_LONG: LenientFloat = Field(None, alias="OBS-LONG")
+    OBS_ELEV: LenientInt = Field(None, alias="OBS-ELEV")
+    ORIGIN: LenientStr = None
+    TELESCOP: LenientStr = None
+    DATE_OBS: LenientStr = Field(None, alias="DATE-OBS")
+    JD: LenientFloat = None
+    RA: LenientFloat = None
+    DEC: LenientFloat = None
+    EQUINOX: LenientStr = None
+    RA_OBJ: LenientStr = None
+    DEC_OBJ: LenientStr = None
+    RA_TEL: LenientFloat = None
+    DEC_TEL: LenientFloat = None
+    ALT_TEL: LenientFloat = None
+    AZ_TEL: LenientFloat = None
+    AIRMASS: LenientFloat = None
+    OBSMODE: LenientStr = None
+    FOCUS: LenientInt = None
+    ROTATOR: LenientFloat = None
+    OBSERVER: LenientStr = None
+    IMAGETYP: LenientStr = None
+    OBSTYPE: LenientStr = None
+    OBJECT: LenientStr = None
+    OBS_PROG: LenientStr = Field(None, alias="OBS-PROG")
+    NLOOPS: LenientInt = None
+    LOOP: LenientInt = None
+    FILTER: LenientStr = None
+    EXPTIME: LenientFloat = None
+    INSTRUME: LenientStr = None
+    CCD_TEMP: LenientFloat = Field(None, alias="CCD-TEMP")
+    SET_TEMP: LenientStr = Field(None, alias="SET-TEMP")
+    XBINNING: LenientInt = None
+    YBINNING: LenientInt = None
+    READ_MOD: LenientInt = Field(None, alias="READ-MOD")
+    GAIN_MOD: LenientInt = Field(None, alias="GAIN-MOD")
+    GAIN: LenientFloat = None
+    RON: LenientFloat = None
+    SUBRASTR: LenientStr = None
+    SCALE: LenientFloat = None
+    SATURATE: LenientStr = None
+    PIERSIDE: LenientInt = None
+    FLAT_ERA: LenientInt = None
+    ZERO_ERA: LenientInt = None
+    DARK_ERA: LenientInt = None
+    TEST: LenientInt = None
+    CCD_BLCL: LenientStr = Field(None, alias="CCD-BLCL")
+    CCD_SCMP: LenientStr = Field(None, alias="CCD-SCMP")
+    CCD_PORT: LenientStr = Field(None, alias="CCD-PORT")
+    CCD_VSSP: LenientStr = Field(None, alias="CCD-VSSP")
+    BZERO: LenientInt = None
+    PI: LenientStr = None
 
     model_config = {"extra": "allow", "populate_by_name": True}
-
-    @model_validator(mode="before")
-    @classmethod
-    def _coerce_by_annotation(cls, data):
-        if not isinstance(data, dict):
-            return data
-        coerced = dict(data)
-        for name, field in cls.model_fields.items():
-            key = name
-            if field.alias is not None and field.alias in coerced:
-                key = field.alias
-            elif name not in coerced:
-                continue
-            value = coerced[key]
-            if value is None:
-                continue
-            target = _unwrap_optional(field.annotation)
-            coercer = _COERCERS.get(target)
-            if coercer is not None:
-                coerced[key] = coercer(value)
-        return coerced
 
 
 class StorageLocationStatus(BaseModel):

@@ -26,8 +26,8 @@ class ObservationBase(BaseModel):
     obs_name: str = Field(..., description="Observation name")
     file_name: Optional[str] = Field(None, description="FITS filename")
     object_id: Optional[str] = Field(None, description="Reference to observed Object document")
-    canonized_object_name: Optional[str] = Field(str, description="Canonized astronomical object name")
-    obs_tags: Optional[Set[str]] = Field(default_factory=set, description="Set of observation tags")
+    canonized_object_name: Optional[str] = Field(None, description="Canonized astronomical object name")
+    obs_tags: Set[str] = Field(default_factory=set, description="Set of observation tags")
 
     # files support
     filetypes: Set[FileClassification] = Field(default_factory=set)
@@ -43,13 +43,13 @@ class ObservationBase(BaseModel):
     )
 
     # Access control
-    access_tags: Optional[List[str]] = Field(
-        list[str], description="tags for document access control", exclude=True
+    access_tags: List[str] = Field(
+        default_factory=list, description="tags for document access control", exclude=True
     )  # exclude field from json dump
 
     # observation date
     date_obs: datetime = Field(
-        datetime, description="internal ISO Date to datetime conversion", exclude=True
+        default_factory=datetime.utcnow, description="internal ISO Date to datetime conversion", exclude=True
     )  # exclude field from json dump
     oca_jd: Optional[int] = Field(None, description="OCM representation of observation date")
 
