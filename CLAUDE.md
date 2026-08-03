@@ -16,17 +16,20 @@ currently two independent model modules:
 
 ## Commands
 
-The project uses `uv` (a `uv`-managed `.venv` is checked in as the active environment). Dev
-dependencies (`pytest`) live in `[dependency-groups]` with `default-groups = ["dev"]` in
-`pyproject.toml`, so a plain `uv sync` always installs them — no `--extra` flag needed.
+The project uses `uv` with a local `.venv` (gitignored, not tracked). Dev dependencies (`pytest`)
+live in `[dependency-groups]` with `default-groups = ["dev"]` in `pyproject.toml`, so a plain
+`uv sync` always installs them — no `--extra`/`--group` flag needed.
 
 ```bash
 uv sync                       # install/sync dependencies
-uv run pytest                 # run the full test suite
+uv run pytest                 # run the full test suite (30 tests, <1s)
 uv run pytest tests/test_projects_overview.py::TestProjectsOverview::test_from_example_file  # single test
 uv run pytest -k measurement  # run tests matching a keyword
-python tests/test_observation.py  # each test file is also runnable directly (has a __main__ block)
+uv run python tests/test_observation.py  # each test file has a __main__ block calling pytest.main
 ```
+
+Always go through `uv run` — bare `python tests/test_observation.py` fails, since the system
+interpreter has neither `pytest` nor `datamodels` installed.
 
 There is no configured linter/formatter and no build/CI pipeline in this repo — don't invent
 lint commands.
@@ -34,6 +37,11 @@ lint commands.
 Packaging uses `hatchling` (PEP 621 metadata in `pyproject.toml`); there is no `[tool.poetry]`
 section despite the tracked `poetry.lock`, so treat `uv` as the source of truth for the
 environment. `uv.lock` is gitignored (local-only).
+
+`requires-python = ">=3.11"` and the only runtime dependency is `pydantic>=2.0` — keep it that
+way; this package is imported by several TACOSS services and must stay dependency-light. Python
+3.11 means built-in generics and `X | None` unions are fine without `from __future__ import
+annotations`.
 
 ## Architecture
 
@@ -52,10 +60,11 @@ Observation
 └── measurements: list[Measurement]  # observation-level measurements (e.g. wcs, photometry)
 ```
 
-- **Lookup by `category`, not by index.** `File` and `Observation` are matched by a `category`
-  string field rather than a fixed schema per kind (e.g. `"raw"`, `"master_z"`, `"wcs"`,
-  `"fwhm"`). `Observation.get_measurement()` / `Observation.get_file()` and `File.get_measurement()`
-  do linear scans over their respective lists to find a match by category. These accessor
+- **Lookup by `category`, not by index.** `File` and `Measurement` each carry a required
+  `category` string that discriminates the kind (e.g. `"raw"`, `"master_z"`, `"wcs"`,
+  `"fwhm"`, `"basic_stats"`) instead of there being a distinct class per kind.
+  `Observation.get_measurement()` / `Observation.get_file()` and `File.get_measurement()` do
+  linear scans over their respective lists and return the first match, or `None`. These accessor
   methods are declared `async def` (no actual async I/O inside) — match that signature/style if
   adding similar lookups.
 
@@ -69,11 +78,11 @@ projects and their objects:
 ProjectsOverview
 ├── processed_date / processed_folder / telescope
 └── projects: dict[str, ProjectOverview]        # keyed by project id, e.g. "amcvn"
-      ├── display_name / pi / sciprog / status
+      ├── display_name + status (required) / pi + sciprog (optional)
       └── objects: dict[str, ObjectOverview]     # keyed by object id, e.g. "asassn-14cc"
-            ├── display_name / status (required)
+            ├── display_name + status (both required)
             └── lc: dict[str, LightCurve]        # keyed by filter/passband, e.g. "u_s", "V"
-                  └── display_name / status (optional)
+                  └── display_name (required) / status (optional — None means "not set")
 ```
 
 Unlike `observation.py`, `projects`/`objects`/`lc` are looked up directly by dict key (they're
@@ -97,6 +106,13 @@ don't uncomment/implement them without checking with the user first.
 - Models must support `model_dump()` / `model_dump_json()` and `model_validate()` /
   `model_validate_json()` round-tripping losslessly — `extra="allow"` fields must survive the
   round trip too.
+- **Collection fields always default to empty, never to `None`** — `Field(default_factory=list)` /
+  `Field(default_factory=dict)` — so consumers can iterate without a `None` guard. Only scalars
+  are `X | None = None`.
+- **Absolute imports everywhere** (`from datamodels.observation import ...`), including inside the
+  package and in tests — the package is always installed, never run from a source path.
+- The two model modules are fully independent: neither imports the other, and `Status` is *not*
+  shared with `observation.py`. Keep them decoupled unless a genuinely shared concept appears.
 
 ## Tests and examples
 
