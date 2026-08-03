@@ -7,27 +7,24 @@
             "display_name": "Project:amcvn PI:kbakowska",
             "pi": "kbakowska",
             "sciprog": "amcvn",
+            "name": "amcvn",
             "status": "ongoing",
             "objects": {
                 "asassn-14cc": {
                     "display_name": "asassn-14cc",
                     "status": "ongoing",
+                    "name": "asassn-14cc",
                     "lc": {
-                        "u_s": {"status": "ongoing", "display_name": "u_s"},
-                        "v_s": {"display_name": "v_s"},
-                        "b_s": {"display_name": "b_s"},
-                        "y_s": {"display_name": "y_s"},
-                        "B": {"display_name": "B"},
-                        "V": {"display_name": "V"},
-                        "Ic": {"display_name": "Ic"},
-                        "Hb_n": {"display_name": "Hb_n"},
-                        "Hb_w": {"display_name": "Hb_w"}
+                        "u_s": {"name":"u_s","status": "ongoing", "display_name": "u_s"},
+                        "v_s": {"name":"v_s","display_name": "v_s"}
+
                     }
 
                 },
                 "fairall9": {
                     "display_name": "fairall9",
                     "status": "halted",
+                    "name": "fairall9",
                     "lc": {}
 
                 }

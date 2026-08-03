@@ -15,6 +15,7 @@ class Status(StrEnum):
 class LightCurve(BaseModel):
     model_config = ConfigDict(extra="allow")
 
+    name: str # same as dict key
     display_name: str
     status: Status | None = None
 
@@ -22,6 +23,7 @@ class LightCurve(BaseModel):
 class ObjectOverview(BaseModel):
     model_config = ConfigDict(extra="allow")
 
+    name: str # same as dict key
     display_name: str
     status: Status
     lc: dict[str, LightCurve] = Field(default_factory=dict)
@@ -32,6 +34,7 @@ class ObjectOverview(BaseModel):
 class ProjectOverview(BaseModel):
     model_config = ConfigDict(extra="allow")
 
+    name: str # same as dict key
     display_name: str
     pi: str | None = None
     sciprog: str | None = None

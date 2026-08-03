@@ -26,50 +26,62 @@ class TestStatus:
 
 class TestLightCurve:
     def test_basic_creation(self):
-        lc = LightCurve(display_name="V", status="ongoing")
+        lc = LightCurve(name="V", display_name="V", status="ongoing")
+        assert lc.name == "V"
         assert lc.display_name == "V"
         assert lc.status == Status.ONGOING
 
     def test_status_optional(self):
-        lc = LightCurve(display_name="V")
+        lc = LightCurve(name="V", display_name="V")
         assert lc.status is None
 
+    def test_name_required(self):
+        with pytest.raises(ValueError):
+            LightCurve(display_name="V")
+
     def test_extra_fields_allowed(self):
-        lc = LightCurve(display_name="V", n_obs=12)
+        lc = LightCurve(name="V", display_name="V", n_obs=12)
         assert lc.n_obs == 12  # type: ignore[attr-defined]
 
 
 class TestObjectOverview:
     def test_basic_creation(self):
-        obj = ObjectOverview(display_name="asassn-14cc", status="ongoing")
+        obj = ObjectOverview(name="asassn-14cc", display_name="asassn-14cc", status="ongoing")
+        assert obj.name == "asassn-14cc"
         assert obj.display_name == "asassn-14cc"
         assert obj.status == Status.ONGOING
         assert obj.lc == {}
 
     def test_status_required(self):
         with pytest.raises(ValueError):
-            ObjectOverview(display_name="fairall9")
+            ObjectOverview(name="fairall9", display_name="fairall9")
+
+    def test_name_required(self):
+        with pytest.raises(ValueError):
+            ObjectOverview(display_name="fairall9", status="halted")
 
     def test_with_lc(self):
         obj = ObjectOverview(
+            name="asassn-14cc",
             display_name="asassn-14cc",
             status="ongoing",
             lc={
-                "u_s": {"display_name": "u_s", "status": "ongoing"},
-                "v_s": {"display_name": "v_s"},
+                "u_s": {"name": "u_s", "display_name": "u_s", "status": "ongoing"},
+                "v_s": {"name": "v_s", "display_name": "v_s"},
             },
         )
         assert obj.lc["u_s"].status == Status.ONGOING
         assert obj.lc["v_s"].status is None
 
     def test_extra_fields_allowed(self):
-        obj = ObjectOverview(display_name="fairall9", status="waiting", ra=10.5)
+        obj = ObjectOverview(name="fairall9", display_name="fairall9", status="waiting", ra=10.5)
         assert obj.ra == 10.5  # type: ignore[attr-defined]
 
 
 class TestProjectOverview:
     def test_basic_creation(self):
         project = ProjectOverview(
+            name="amcvn",
             display_name="Project:amcvn PI:kbakowska",
             pi="kbakowska",
             sciprog="amcvn",
@@ -79,21 +91,28 @@ class TestProjectOverview:
         assert project.objects == {}
 
     def test_pi_and_sciprog_optional(self):
-        project = ProjectOverview(display_name="Project:amcvn", status="ongoing")
+        project = ProjectOverview(name="amcvn", display_name="Project:amcvn", status="ongoing")
         assert project.pi is None
         assert project.sciprog is None
 
     def test_status_required(self):
         with pytest.raises(ValueError):
-            ProjectOverview(display_name="Project:amcvn")
+            ProjectOverview(name="amcvn", display_name="Project:amcvn")
+
+    def test_name_required(self):
+        with pytest.raises(ValueError):
+            ProjectOverview(display_name="Project:amcvn", status="ongoing")
 
     def test_with_objects(self):
         project = ProjectOverview(
+            name="amcvn",
             display_name="Project:amcvn PI:kbakowska",
             pi="kbakowska",
             sciprog="amcvn",
             status="ongoing",
-            objects={"asassn-14cc": {"display_name": "asassn-14cc", "status": "ongoing"}},
+            objects={
+                "asassn-14cc": {"name": "asassn-14cc", "display_name": "asassn-14cc", "status": "ongoing"}
+            },
         )
         assert project.objects["asassn-14cc"].status == Status.ONGOING
 
