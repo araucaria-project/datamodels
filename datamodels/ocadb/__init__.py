@@ -7,8 +7,10 @@ from datamodels.ocadb.fits import (
     StorageStatus,
     StorageStatusType,
 )
+from datamodels.ocadb.observation import ObservationBase
 
 __all__ = [
     "DigestStr", "FileClassification", "FITSFile", "FitsHeader",
     "StorageLocationStatus", "StorageStatus", "StorageStatusType",
+    "ObservationBase",
 ]
