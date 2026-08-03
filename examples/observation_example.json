@@ -1,0 +1,480 @@
+{
+    "info": {
+        "obs_id": "wk06c_0449_72052",
+        "date_obs": "2024-05-19T05:17:33.210089Z",
+        "jd_date_obs": 2460449.7205232647,
+        "oca_night": 449
+    },
+    "quality_checks": {
+        "fwhm": {
+            "id": "fwhm",
+            "tag": "fwhm",
+            "quality_value": 1,
+            "comment": "WARN: FWHM is on warning level.",
+            "data_source": "raw_fits",
+            "metadata": {
+                "fwhm": 2.7,
+                "fwhm_x": 2.77,
+                "fwhm_y": 2.59,
+                "fwhm_levels": {
+                    "good": {
+                        "min": 0,
+                        "max": 2.7
+                    },
+                    "warn": {
+                        "min": 2.7,
+                        "max": 3.4
+                    },
+                    "bad": {
+                        "min": 3.4
+                    }
+                }
+            }
+        },
+        "ccd_temp": {
+            "id": "ccd_temp",
+            "tag": "ccdt",
+            "quality_value": 0,
+            "comment": "GOOD: Ccd temp. is on good level.",
+            "data_source": "raw_fits",
+            "metadata": {
+                "ccd_temp": -59.777000427246094,
+                "ccd_temp_max": -50
+            }
+        },
+        "stars_presence": {
+            "id": "stars_presence",
+            "tag": "spok",
+            "quality_value": 0,
+            "comment": "GOOD: stars quality ok.",
+            "data_source": "raw_fits",
+            "metadata": {
+                "status": "ok",
+                "sum_by_class": {
+                    "0": 4193031,
+                    "1": 1247,
+                    "2": 1,
+                    "3": 5,
+                    "4": 20
+                },
+                "ratio_by_class": {
+                    "0": 0.999696,
+                    "1": 0.000297,
+                    "2": 0.0,
+                    "3": 1e-06,
+                    "4": 5e-06
+                },
+                "ratio_no_bkg": {
+                    "1": 0.979576,
+                    "2": 0.000786,
+                    "3": 0.003928,
+                    "4": 0.015711
+                },
+                "good_ratio_no_bkg_thresh": 0.4,
+                "bad_ratio_no_bkg_thresh": 0.05
+            }
+        },
+        "stars_missing": {
+            "id": "stars_missing",
+            "tag": "stmi",
+            "quality_value": 0,
+            "comment": "GOOD: stars detected.",
+            "data_source": "raw_fits",
+            "metadata": {
+                "status": "ok",
+                "ratio_by_class": {
+                    "0": 0.999696,
+                    "1": 0.000297,
+                    "2": 0.0,
+                    "3": 1e-06,
+                    "4": 5e-06
+                },
+                "ratio_no_bkg": {
+                    "1": 0.979576,
+                    "2": 0.000786,
+                    "3": 0.003928,
+                    "4": 0.015711
+                },
+                "cosmic_bad_pixels_warn": 0.5
+            }
+        },
+        "final": {
+            "id": "final",
+            "quality_value": 1,
+            "comment": "WARN: Some quality checks on warning level, check wk06c_0449_72052.json for details."
+        }
+    },
+    "objects": {
+        "lp_lib": {
+            "quality_checks": {
+                "max_adu_level": {
+                    "id": "max_adu_level",
+                    "tag": "ssat",
+                    "quality_value": 0,
+                    "comment": "GOOD: Object adu is on good level.",
+                    "data_source": "raw_fits",
+                    "metadata": {
+                        "measured_adu": 26717.0,
+                        "max_adu": 49151.25,
+                        "min_adu": 655.35
+                    }
+                },
+                "not_in_frame": {
+                    "id": "not_in_frame",
+                    "tag": "notf",
+                    "quality_value": 0,
+                    "comment": "GOOD: Object is in the frame.",
+                    "data_source": "raw_fits",
+                    "metadata": {
+                        "x_pix_loc": 836.6291036394138,
+                        "y_pix_loc": 932.4022207067368,
+                        "naxis_x": 2048,
+                        "naxis_y": 2048
+                    }
+                },
+                "too_close_to_frame_edge": {
+                    "id": "too_close_to_frame_edge",
+                    "tag": "tcte",
+                    "quality_value": 0,
+                    "comment": "GOOD: The object is not too close to the edge of the frame.",
+                    "data_source": "raw_fits",
+                    "metadata": {
+                        "x_edge_dist": 836.6291036394138,
+                        "y_edge_dist": 932.4022207067368,
+                        "edge_distance_restrict_pix": 50
+                    }
+                },
+                "final": {
+                    "id": "final",
+                    "quality_value": 0,
+                    "comment": "GOOD: Quality checks success, check wk06c_0449_72052.json for details."
+                }
+            }
+        }
+    },
+    "files": [
+        {
+            "category": "raw",
+            "file_name": "wk06c_0449_72052.fits",
+            "header": {
+                "SIMPLE": true,
+                "BITPIX": 16,
+                "NAXIS": 2,
+                "NAXIS1": 2048,
+                "NAXIS2": 2048,
+                "OCASTD": "BETA3",
+                "OBSERVAT": "OCA",
+                "OBS-LAT": -24.598056,
+                "OBS-LONG": -70.196389,
+                "OBS-ELEV": 2817,
+                "ORIGIN": "CAMK PAN",
+                "TELESCOP": "wk06",
+                "DATE-OBS": "2024-05-19T05:17:33.210089",
+                "JD": 2460449.7205232647,
+                "RA": 228.410313,
+                "DEC": -20.442254,
+                "EQUINOX": 2000.0,
+                "RA_OBJ": "",
+                "DEC_OBJ": "",
+                "RA_TEL": 228.76455250919236,
+                "DEC_TEL": -20.534994088126446,
+                "ALT_TEL": 73.04398904518,
+                "AZ_TEL": 280.2889977616518,
+                "AIRMASS": "",
+                "OBSMODE": "",
+                "FOCUS": 21253,
+                "ROTATOR": "",
+                "OBSERVER": "",
+                "IMAGETYP": "science",
+                "OBSTYPE": "science",
+                "OBJECT": "LP_Lib",
+                "OBS-PROG": "",
+                "NLOOPS": 1,
+                "LOOP": 1,
+                "FILTER": "B",
+                "EXPTIME": 8.0,
+                "INSTRUME": "DW936_BV",
+                "CCD-TEMP": -59.777000427246094,
+                "SET-TEMP": "",
+                "XBINNING": 1,
+                "YBINNING": 1,
+                "READ-MOD": 2,
+                "GAIN-MOD": 2,
+                "GAIN": "",
+                "RON": "",
+                "SUBRASTR": "",
+                "SCALE": 0.66,
+                "SATURATE": "",
+                "WCSAXES": 2,
+                "CRPIX1": 724.936497688,
+                "CRPIX2": 1283.87930298,
+                "PC1_1": 0.00018124692072,
+                "PC1_2": -2.6991763501e-05,
+                "PC2_1": -2.70354042594e-05,
+                "PC2_2": -0.000181197019492,
+                "CDELT1": 1.0,
+                "CDELT2": 1.0,
+                "CUNIT1": "deg",
+                "CUNIT2": "deg",
+                "CTYPE1": "RA---TAN",
+                "CTYPE2": "DEC--TAN",
+                "CRVAL1": 228.378427756,
+                "CRVAL2": -20.5027131388,
+                "LONPOLE": 180.0,
+                "LATPOLE": -20.5027131388,
+                "MJDREF": 0.0,
+                "RADESYS": "FK5",
+                "BSCALE": 1,
+                "BZERO": 32768,
+                "COMMENT": ""
+            },
+            "measurements": [
+                {
+                    "category": "basic_stats",
+                    "result": {
+                        "min": 305.0,
+                        "max": 36939.0,
+                        "mean": 370.76199746131897,
+                        "median": 370.0,
+                        "std": 73.18816882930709,
+                        "rms": 73.18816882930709,
+                        "sigma_quantile": 11.0
+                    }
+                }
+            ]
+        },
+        {
+            "category": "zdf",
+            "file_name": "wk06c_0449_72052_zdf.fits",
+            "header": {
+                "SIMPLE": true,
+                "BITPIX": -32,
+                "NAXIS": 2,
+                "NAXIS1": 2048,
+                "NAXIS2": 2048,
+                "OCASTD": "BETA3",
+                "OBSERVAT": "OCA",
+                "OBS-LAT": -24.598056,
+                "OBS-LONG": -70.196389,
+                "OBS-ELEV": 2817,
+                "ORIGIN": "CAMK PAN",
+                "TELESCOP": "wk06",
+                "DATE-OBS": "2024-05-19T05:17:33.210089",
+                "JD": 2460449.7205232647,
+                "RA": 228.410313,
+                "DEC": -20.442254,
+                "EQUINOX": 2000.0,
+                "RA_OBJ": "",
+                "DEC_OBJ": "",
+                "RA_TEL": 228.76455250919236,
+                "DEC_TEL": -20.534994088126446,
+                "ALT_TEL": 73.04398904518,
+                "AZ_TEL": 280.2889977616518,
+                "AIRMASS": "",
+                "OBSMODE": "",
+                "FOCUS": 21253,
+                "ROTATOR": "",
+                "OBSERVER": "",
+                "IMAGETYP": "science",
+                "OBSTYPE": "science",
+                "OBJECT": "LP_Lib",
+                "OBS-PROG": "",
+                "NLOOPS": 1,
+                "LOOP": 1,
+                "FILTER": "B",
+                "EXPTIME": 8.0,
+                "INSTRUME": "DW936_BV",
+                "CCD-TEMP": -59.777000427246094,
+                "SET-TEMP": "",
+                "XBINNING": 1,
+                "YBINNING": 1,
+                "READ-MOD": 2,
+                "GAIN-MOD": 2,
+                "GAIN": "",
+                "RON": "",
+                "SUBRASTR": "",
+                "SCALE": 0.66,
+                "SATURATE": "",
+                "OFP_VER": "1.10.0",
+                "OFP_DATE": "2026-06-03T11:00:17.993595+00:00",
+                "OFPRW1": "wk06c_0449_72052.fits",
+                "OFP_ZERO": "wk06c_0449_92928_master_z.fits",
+                "OFP_DARK": "wk06c_0510_83620_master_d.fits",
+                "OFP_FLAT": "wk06c_0449_95056_master_f_B.fits",
+                "OFP_SHUT": "wk06c_1087_00000_master_s.fits",
+                "OFP_MODE": "lc",
+                "WCSAXES": 2,
+                "LONPOLE": 180.0,
+                "LATPOLE": 0.0,
+                "CRVAL1": 228.44178053621138,
+                "CRVAL2": -20.301336756974916,
+                "CRPIX1": 883.7699471534831,
+                "CRPIX2": 149.07447117716774,
+                "CUNIT1": "deg",
+                "CUNIT2": "deg",
+                "CD1_1": 0.000181258600453645,
+                "CD1_2": -2.6929186872324e-05,
+                "CD2_1": -2.6968909238183e-05,
+                "CD2_2": -0.00018123942461462,
+                "CTYPE1": "RA---TAN-SIP",
+                "CTYPE2": "DEC--TAN-SIP",
+                "A_ORDER": 2,
+                "A_0_0": 0.0,
+                "A_0_1": 0.0,
+                "A_0_2": -6.9429739916942e-08,
+                "A_1_0": 0.0,
+                "A_1_1": 1.897805243282e-09,
+                "A_2_0": -2.1258182280736e-07,
+                "B_ORDER": 2,
+                "B_0_0": 0.0,
+                "B_0_1": 0.0,
+                "B_0_2": 7.30979518382787e-08,
+                "B_1_0": 0.0,
+                "B_1_1": -7.5774522077199e-08,
+                "B_2_0": 2.83317561831701e-08,
+                "AP_ORDER": 2,
+                "AP_0_0": -4.2732245655763e-06,
+                "AP_0_1": 6.30294763355486e-09,
+                "AP_0_2": 6.94076946825593e-08,
+                "AP_1_0": 3.99714054118406e-08,
+                "AP_1_1": -1.8289339184172e-09,
+                "AP_2_0": 2.12610097205783e-07,
+                "BP_ORDER": 2,
+                "BP_0_0": -6.458063194431e-06,
+                "BP_0_1": -1.2399864023088e-08,
+                "BP_0_2": -7.3058708029981e-08,
+                "BP_1_0": -6.0057647856523e-09,
+                "BP_1_1": 7.57447286533689e-08,
+                "BP_2_0": -2.8314134834919e-08,
+                "COMMENT": ""
+            },
+            "measurements": [
+                {
+                    "category": "basic_stats",
+                    "result": {
+                        "min": -220.87313842773438,
+                        "max": 36426.75390625,
+                        "mean": 70.3453915205177,
+                        "median": 69.75538635253906,
+                        "std": 72.9701674836655,
+                        "rms": 72.9701674836655,
+                        "sigma_quantile": 11.741635482788084
+                    }
+                }
+            ]
+        }
+    ],
+    "measurements": [
+        {
+            "category": "pointing_error",
+            "result": {
+                "ra_solv": 228.4439147580835,
+                "dec_solv": -20.463904390539707,
+                "err_dist": 0.03820414171903747,
+                "new_px_ra": 836.7173689801547,
+                "new_px_dec": 932.4093046178878,
+                "real_ra_diff": -0.03148567637083712,
+                "dec_diff": 0.021650390539708297
+            },
+            "file_category": "zdf"
+        },
+        {
+            "category": "wcs",
+            "result": {
+                "EQUINOX": 2000.0,
+                "WCSAXES": 2,
+                "LONPOLE": 180.0,
+                "LATPOLE": 0.0,
+                "CRVAL1": 228.44178053621138,
+                "CRVAL2": -20.301336756974916,
+                "CRPIX1": 883.7699471534831,
+                "CRPIX2": 149.07447117716774,
+                "CUNIT1": "deg",
+                "CUNIT2": "deg",
+                "CD1_1": 0.000181258600453645,
+                "CD1_2": -2.6929186872324e-05,
+                "CD2_1": -2.6968909238183e-05,
+                "CD2_2": -0.00018123942461462,
+                "CTYPE1": "RA---TAN-SIP",
+                "CTYPE2": "DEC--TAN-SIP",
+                "A_ORDER": 2,
+                "A_0_0": 0.0,
+                "A_0_1": 0.0,
+                "A_0_2": -6.9429739916942e-08,
+                "A_1_0": 0.0,
+                "A_1_1": 1.897805243282e-09,
+                "A_2_0": -2.1258182280736e-07,
+                "B_ORDER": 2,
+                "B_0_0": 0.0,
+                "B_0_1": 0.0,
+                "B_0_2": 7.30979518382787e-08,
+                "B_1_0": 0.0,
+                "B_1_1": -7.5774522077199e-08,
+                "B_2_0": 2.83317561831701e-08,
+                "AP_ORDER": 2,
+                "AP_0_0": -4.2732245655763e-06,
+                "AP_0_1": 6.30294763355486e-09,
+                "AP_0_2": 6.94076946825593e-08,
+                "AP_1_0": 3.99714054118406e-08,
+                "AP_1_1": -1.8289339184172e-09,
+                "AP_2_0": 2.12610097205783e-07,
+                "BP_ORDER": 2,
+                "BP_0_0": -6.458063194431e-06,
+                "BP_0_1": -1.2399864023088e-08,
+                "BP_0_2": -7.3058708029981e-08,
+                "BP_1_0": -6.0057647856523e-09,
+                "BP_1_1": 7.57447286533689e-08,
+                "BP_2_0": -2.8314134834919e-08
+            },
+            "info": {
+                "wcs_source": "header",
+                "fits_source": "stacker",
+                "fits_type": "zdf",
+                "status": "ok",
+                "solution_date": null
+            }
+        },
+        {
+            "category": "fwhm",
+            "result": {
+                "fwhm_x": 2.77,
+                "fwhm_y": 2.59,
+                "fwhm": 2.7,
+                "ellipticity": 0.06
+            },
+            "file_category": "zdf"
+        },
+        {
+            "category": "stars_presence",
+            "result": {
+                "status": "ok",
+                "file_category": "raw",
+                "source": "observation_file",
+                "sum_by_class": {
+                    "0": 4193031,
+                    "1": 1247,
+                    "2": 1,
+                    "3": 5,
+                    "4": 20
+                },
+                "ratio_by_class": {
+                    "0": 0.999696,
+                    "1": 0.000297,
+                    "2": 0.0,
+                    "3": 1e-06,
+                    "4": 5e-06
+                },
+                "ratio_no_bkg": {
+                    "1": 0.979576,
+                    "2": 0.000786,
+                    "3": 0.003928,
+                    "4": 0.015711
+                },
+                "qmap_path": "/work/vela/oca/fits/wk06/processed-ofp/science/0449/wk06c_0449_72052/wk06c_0449_72052_qmap.png",
+                "msg": "Segmentation done",
+                "segment_date": null
+            },
+            "file_category": "raw"
+        }
+    ]
+}

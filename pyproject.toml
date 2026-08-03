@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datamodels"
-version = "0.2.0"
+version = "0.2.1"
 description = "Data Models used on ocabox TACOSS software (OCM)"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,7 +12,7 @@ dependencies = [
     "pydantic>=2.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8.0",
 ]
@@ -22,3 +22,6 @@ packages = ["datamodels"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.uv]
+default-groups = ["dev"]
