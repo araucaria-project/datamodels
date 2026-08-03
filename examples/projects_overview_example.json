@@ -1,0 +1,35 @@
+{
+    "processed_date": "2026-07-28T21:05:12.123456+00:00",
+    "processed_folder": "0987",
+    "telescope": "zb08",
+    "projects": {
+        "amcvn": {
+            "display_name": "Project:amcvn PI:kbakowska",
+            "pi": "kbakowska",
+            "sciprog": "amcvn",
+            "name": "amcvn",
+            "status": "ongoing",
+            "objects": {
+                "asassn-14cc": {
+                    "display_name": "asassn-14cc",
+                    "status": "ongoing",
+                    "name": "asassn-14cc",
+                    "lc": {
+                        "u_s": {"name":"u_s","status": "ongoing", "display_name": "u_s"},
+                        "v_s": {"name":"v_s","display_name": "v_s"}
+
+                    }
+
+                },
+                "fairall9": {
+                    "display_name": "fairall9",
+                    "status": "halted",
+                    "name": "fairall9",
+                    "lc": {}
+
+                }
+            }
+        }
+
+    }
+}

@@ -1,15 +1,20 @@
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
 from datamodels.observation import File, Info, Measurement, Observation
+
+EXAMPLE_PATH = Path(__file__).parent.parent / "examples" / "observation_example.json"
 
 
 def make_info(**kwargs):
     defaults = {
         "obs_id": "zb08c_1021_34234",
         "date_obs": "2026-05-12T01:23:21.234Z",
-        "oca_jd": 1021,
+        "jd_date_obs": 2461172.55793,
+        "oca_night": 1021,
     }
     defaults.update(kwargs)
     return Info(**defaults)
@@ -19,7 +24,8 @@ class TestInfo:
     def test_basic_creation(self):
         info = make_info()
         assert info.obs_id == "zb08c_1021_34234"
-        assert info.oca_jd == 1021
+        assert info.jd_date_obs == 2461172.55793
+        assert info.oca_night == 1021
         assert isinstance(info.date_obs, datetime)
 
     def test_extra_fields_allowed(self):
@@ -89,54 +95,33 @@ class TestObservation:
         assert obs.files == []
         assert obs.measurements == []
 
-    def test_full_observation(self):
-        info = make_info(field_name="Oph_V", uobi="213eq2")
-        files = [
-            File(category="raw", measurements=[Measurement(category="fwhm", result=3.5)]),
-            File(category="zdf"),
-            File(category="master_z", file_name="master_z.fits"),
-        ]
-        measurements = [
-            Measurement(
-                category="wcs",
-                result=(123.56, -32.05),
-                number_of_stars_used=450,
-            ),
-            Measurement(
-                category="fwhm",
-                method="gaussian",
-                result={"dx": 12.4, "dy": 23.8},
-            ),
-            Measurement(category="pointing_error", result={"dx": 11.4, "dy": 23.8}),
-            Measurement(category="photometry", result={"V": 11.4, "V_err": 0.2}),
-        ]
-        obs = Observation(
-            info=info,
-            quality_checks={"passed": True},
-            files=files,
-            measurements=measurements,
-        )
+    def test_from_example_file(self):
+        data = json.loads(EXAMPLE_PATH.read_text())
+        obs = Observation.model_validate(data)
 
-        assert obs.info.field_name == "Oph_V"  # type: ignore[attr-defined]
-        assert len(obs.files) == 3
+        assert obs.info.obs_id == "wk06c_0449_72052"
+        assert obs.info.oca_night == 449
+        assert len(obs.files) == 2
         assert obs.files[0].category == "raw"
+        assert obs.files[0].measurements[0].category == "basic_stats"
         assert len(obs.measurements) == 4
-        assert obs.measurements[1].method == "gaussian"  # type: ignore[attr-defined]
-        assert obs.quality_checks == {"passed": True}
+        assert obs.measurements[1].category == "wcs"
+        assert obs.objects["lp_lib"]["quality_checks"]["max_adu_level"]["quality_value"] == 0
 
     def test_serialization_roundtrip(self):
-        obs = Observation(
-            info=make_info(),
-            files=[File(category="raw")],
-            measurements=[Measurement(category="wcs", result={"ra": 123.56, "dec": -32.05})],
-        )
-        data = obs.model_dump()
-        obs2 = Observation.model_validate(data)
-        assert obs2.info.obs_id == obs.info.obs_id
-        assert obs2.measurements[0].result == {"ra": 123.56, "dec": -32.05}
+        data = json.loads(EXAMPLE_PATH.read_text())
+        obs = Observation.model_validate(data)
+        dumped = obs.model_dump()
+        obs2 = Observation.model_validate(dumped)
+        assert obs2 == obs
 
     def test_json_roundtrip(self):
-        obs = Observation(info=make_info())
+        data = json.loads(EXAMPLE_PATH.read_text())
+        obs = Observation.model_validate(data)
         json_str = obs.model_dump_json()
         obs2 = Observation.model_validate_json(json_str)
-        assert obs2.info.oca_jd == 1021
+        assert obs2.info.oca_night == 449
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
