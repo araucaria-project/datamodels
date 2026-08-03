@@ -13,11 +13,7 @@ def make_info(**kwargs):
     defaults = {
         "obs_id": "zb08c_1021_34234",
         "date_obs": "2026-05-12T01:23:21.234Z",
-<<<<<<< HEAD
-        "jd_date_obs": 2461021.5,
-=======
         "jd_date_obs": 2461172.55793,
->>>>>>> origin/master
         "oca_night": 1021,
     }
     defaults.update(kwargs)
@@ -28,10 +24,7 @@ class TestInfo:
     def test_basic_creation(self):
         info = make_info()
         assert info.obs_id == "zb08c_1021_34234"
-<<<<<<< HEAD
-=======
         assert info.jd_date_obs == 2461172.55793
->>>>>>> origin/master
         assert info.oca_night == 1021
         assert isinstance(info.date_obs, datetime)
 
@@ -127,12 +120,8 @@ class TestObservation:
         obs = Observation.model_validate(data)
         json_str = obs.model_dump_json()
         obs2 = Observation.model_validate_json(json_str)
-<<<<<<< HEAD
-        assert obs2.info.oca_night == 1021
-=======
         assert obs2.info.oca_night == 449
 
 
 if __name__ == "__main__":
     pytest.main([__file__])
->>>>>>> origin/master
