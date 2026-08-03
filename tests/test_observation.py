@@ -9,7 +9,8 @@ def make_info(**kwargs):
     defaults = {
         "obs_id": "zb08c_1021_34234",
         "date_obs": "2026-05-12T01:23:21.234Z",
-        "oca_jd": 1021,
+        "jd_date_obs": 2461021.5,
+        "oca_night": 1021,
     }
     defaults.update(kwargs)
     return Info(**defaults)
@@ -19,7 +20,7 @@ class TestInfo:
     def test_basic_creation(self):
         info = make_info()
         assert info.obs_id == "zb08c_1021_34234"
-        assert info.oca_jd == 1021
+        assert info.oca_night == 1021
         assert isinstance(info.date_obs, datetime)
 
     def test_extra_fields_allowed(self):
@@ -139,4 +140,4 @@ class TestObservation:
         obs = Observation(info=make_info())
         json_str = obs.model_dump_json()
         obs2 = Observation.model_validate_json(json_str)
-        assert obs2.info.oca_jd == 1021
+        assert obs2.info.oca_night == 1021

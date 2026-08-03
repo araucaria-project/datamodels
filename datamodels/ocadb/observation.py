@@ -69,6 +69,9 @@ class ObservationBase(BaseModel):
 
     @model_validator(mode='after')
     def store_oca_jd(self):
+        # workaround - pydantic bug?? similar to https://github.com/google/adk-python/issues/3633
+        if isinstance(self.fits_header, dict):
+            self.fits_header = FitsHeader.model_validate(self.fits_header)
         if self.fits_header.JD is not None:
             self.oca_jd = int(self.fits_header.JD) % 10000
         return self
