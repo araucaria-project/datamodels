@@ -1,4 +1,4 @@
-from datamodels.fits import (
+from datamodels.ocadb.fits import (
     FileClassification,
     FITSFile,
     FitsHeader,
