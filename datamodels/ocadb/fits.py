@@ -21,6 +21,7 @@ class StorageStatusType(str, Enum):
     CORRUPTED = "corrupted"
     REQUESTED = "requested"
     SCHEDULED = "scheduled"
+    ON_DEMAND = "on_demand"
     QUEUED = "queued"
     STORING = "storing"
 
@@ -176,6 +177,10 @@ class StorageLocationStatus(BaseModel):
     @classmethod
     def scheduled(cls) -> "StorageLocationStatus":
         return cls(ready=False, check_needed=False, status=StorageStatusType.SCHEDULED)
+
+    @classmethod
+    def on_demand(cls) -> "StorageLocationStatus":
+        return cls(ready=False, check_needed=False, status=StorageStatusType.ON_DEMAND)
 
 
 class StorageStatus(BaseModel):
