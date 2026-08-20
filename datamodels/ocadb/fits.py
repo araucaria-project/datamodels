@@ -247,4 +247,4 @@ class FITSFile(BaseModel):
 
     def to_dict(self) -> dict:
         """Serialize to a JSON-compatible dict for the OcaDB API."""
-        return self.model_dump(mode="json", by_alias=True, exclude={"path", "created_at", "updated_at"})
+        return self.model_dump(mode="json", by_alias=True, exclude={"created_at", "updated_at"})
