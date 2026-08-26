@@ -18,6 +18,7 @@ class LightCurve(BaseModel):
     name: str # same as dict key
     display_name: str
     status: Status | None = None
+    file_name: str | None = None
 
 
 class ObjectOverview(BaseModel):
