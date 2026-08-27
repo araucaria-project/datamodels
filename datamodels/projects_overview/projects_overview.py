@@ -10,6 +10,7 @@ class Status(StrEnum):
     HALTED = "halted"
     WAITING = "waiting"
     FINISHED = "finished"
+    OMITTED = "omitted"
 
 
 class LightCurve(BaseModel):
