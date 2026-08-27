@@ -22,18 +22,33 @@ class TestStatus:
         assert Status.HALTED == "halted"
         assert Status.WAITING == "waiting"
         assert Status.FINISHED == "finished"
+        assert Status.OMITTED == "omitted"
 
 
 class TestLightCurve:
     def test_basic_creation(self):
-        lc = LightCurve(name="V", display_name="V", status="ongoing")
+        lc = LightCurve(
+            name="V",
+            display_name="V",
+            status="ongoing",
+            file_name="asassn-14cc_zb08_V_diff_ap_lc.png",
+        )
         assert lc.name == "V"
         assert lc.display_name == "V"
         assert lc.status == Status.ONGOING
+        assert lc.file_name == "asassn-14cc_zb08_V_diff_ap_lc.png"
 
     def test_status_optional(self):
         lc = LightCurve(name="V", display_name="V")
         assert lc.status is None
+
+    def test_file_name_optional(self):
+        lc = LightCurve(name="V", display_name="V")
+        assert lc.file_name is None
+
+    def test_status_omitted(self):
+        lc = LightCurve(name="V", display_name="V", status="omitted")
+        assert lc.status == Status.OMITTED
 
     def test_name_required(self):
         with pytest.raises(ValueError):
@@ -60,18 +75,30 @@ class TestObjectOverview:
         with pytest.raises(ValueError):
             ObjectOverview(display_name="fairall9", status="halted")
 
+    def test_status_omitted(self):
+        obj = ObjectOverview(name="ngc1566", display_name="ngc1566", status="omitted")
+        assert obj.status == Status.OMITTED
+        assert obj.lc == {}
+
     def test_with_lc(self):
         obj = ObjectOverview(
             name="asassn-14cc",
             display_name="asassn-14cc",
             status="ongoing",
             lc={
-                "u_s": {"name": "u_s", "display_name": "u_s", "status": "ongoing"},
+                "u_s": {
+                    "name": "u_s",
+                    "display_name": "u_s",
+                    "status": "ongoing",
+                    "file_name": "asassn-14cc_zb08_u_s_diff_ap_lc.png",
+                },
                 "v_s": {"name": "v_s", "display_name": "v_s"},
             },
         )
         assert obj.lc["u_s"].status == Status.ONGOING
+        assert obj.lc["u_s"].file_name == "asassn-14cc_zb08_u_s_diff_ap_lc.png"
         assert obj.lc["v_s"].status is None
+        assert obj.lc["v_s"].file_name is None
 
     def test_extra_fields_allowed(self):
         obj = ObjectOverview(name="fairall9", display_name="fairall9", status="waiting", ra=10.5)
@@ -139,10 +166,18 @@ class TestProjectsOverview:
         obj = project.objects["asassn-14cc"]
         assert obj.status == Status.ONGOING
         assert obj.lc["u_s"].status == Status.ONGOING
+        assert obj.lc["u_s"].file_name == "asassn-14cc_zb08_u_s_diff_ap_lc.png"
         assert obj.lc["v_s"].status is None
+        assert obj.lc["v_s"].file_name is None
+        assert obj.lc["i_s"].status == Status.OMITTED
+        assert obj.lc["i_s"].file_name is None
 
         fairall9 = project.objects["fairall9"]
         assert fairall9.lc == {}
+
+        ngc1566 = project.objects["ngc1566"]
+        assert ngc1566.status == Status.OMITTED
+        assert ngc1566.lc == {}
 
     def test_serialization_roundtrip(self):
         data = json.loads(EXAMPLE_PATH.read_text())
@@ -150,6 +185,14 @@ class TestProjectsOverview:
         dumped = overview.model_dump()
         overview2 = ProjectsOverview.model_validate(dumped)
         assert overview2 == overview
+
+    def test_file_name_survives_roundtrip(self):
+        data = json.loads(EXAMPLE_PATH.read_text())
+        overview = ProjectsOverview.model_validate(data)
+        overview2 = ProjectsOverview.model_validate_json(overview.model_dump_json())
+        assert overview2 == overview
+        lc = overview2.projects["amcvn"].objects["asassn-14cc"].lc["u_s"]
+        assert lc.file_name == "asassn-14cc_zb08_u_s_diff_ap_lc.png"
 
     def test_json_roundtrip(self):
         data = json.loads(EXAMPLE_PATH.read_text())

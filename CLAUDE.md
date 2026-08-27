@@ -22,7 +22,7 @@ live in `[dependency-groups]` with `default-groups = ["dev"]` in `pyproject.toml
 
 ```bash
 uv sync                       # install/sync dependencies
-uv run pytest                 # run the full test suite (30 tests, <1s)
+uv run pytest                 # run the full test suite (37 tests, <1s)
 uv run pytest tests/test_projects_overview.py::TestProjectsOverview::test_from_example_file  # single test
 uv run pytest -k measurement  # run tests matching a keyword
 uv run python tests/test_observation.py  # each test file has a __main__ block calling pytest.main
@@ -78,19 +78,23 @@ projects and their objects:
 ProjectsOverview
 ├── processed_date / processed_folder / telescope
 └── projects: dict[str, ProjectOverview]        # keyed by project id, e.g. "amcvn"
-      ├── display_name + status (required) / pi + sciprog (optional)
+      ├── name + display_name + status (required) / pi + sciprog (optional)
       └── objects: dict[str, ObjectOverview]     # keyed by object id, e.g. "asassn-14cc"
-            ├── display_name + status (both required)
+            ├── name + display_name + status (all required)
             └── lc: dict[str, LightCurve]        # keyed by filter/passband, e.g. "u_s", "V"
-                  └── display_name (required) / status (optional — None means "not set")
+                  ├── name + display_name (required) / status (optional — None means "not set")
+                  └── file_name (optional) — plot file, {object}_{telescope}_{filter}_diff_ap_lc.png
 ```
 
 Unlike `observation.py`, `projects`/`objects`/`lc` are looked up directly by dict key (they're
 already keyed collections) — there are no `get_*` scan helpers here, and none are needed.
 
-`Status` is a shared `str` enum: `ongoing`, `paused`, `halted`, `waiting`, `finished`. Per current
-requirements, `ongoing` on a later report is meant to take precedence over other statuses seen for
-the same object across repeated processing runs — that merge/precedence logic is **not yet
+Every model here (`ProjectOverview`, `ObjectOverview`, `LightCurve`) carries a required `name`
+field that duplicates its key in the parent dict — set both, and keep them in sync.
+
+`Status` is a shared `StrEnum`: `ongoing`, `paused`, `halted`, `waiting`, `finished`, `omitted`.
+Per current requirements, `ongoing` on a later report is meant to take precedence over other
+statuses seen for the same object across repeated processing runs — that merge/precedence logic is **not yet
 implemented**, deliberately deferred.
 
 `ObjectOverview` has two fields commented out (`skymap`, `info`) — their shape isn't settled yet;
