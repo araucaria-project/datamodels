@@ -13,6 +13,9 @@ currently two independent model modules:
 - `datamodels/observation/observation.py` — a single observation's data (files, measurements, quality checks).
 - `datamodels/projects_overview/projects_overview.py` — a processing run's overview of projects/objects and their
   statuses.
+- `datamodels/optics/` — the **Optical Path Model v4** vocabularies and schemas (spec: knowledge-base
+  `Architecture/Optical Path Model.md`; epic araucaria-project/ocabox-server#27; this module:
+  araucaria-project/datamodels#10). Names and shapes only — the solver lives in ocabox-common.
 
 ## Commands
 
@@ -31,8 +34,9 @@ uv run python tests/test_observation.py  # each test file has a __main__ block c
 Always go through `uv run` — bare `python tests/test_observation.py` fails, since the system
 interpreter has neither `pytest` nor `datamodels` installed.
 
-There is no configured linter/formatter and no build/CI pipeline in this repo — don't invent
-lint commands.
+There is no configured linter/formatter — don't invent lint commands. CI (`.github/workflows/ci.yml`)
+runs pytest on 3.11–3.13 and fails if the committed JSON Schemas under `schemas/optics/` drift from
+a fresh export.
 
 Packaging uses `hatchling` (PEP 621 metadata in `pyproject.toml`); there is no `[tool.poetry]`
 section despite the tracked `poetry.lock`, so treat `uv` as the source of truth for the
@@ -100,7 +104,44 @@ implemented**, deliberately deferred.
 `ObjectOverview` has two fields commented out (`skymap`, `info`) — their shape isn't settled yet;
 don't uncomment/implement them without checking with the user first.
 
-### Shared conventions (both modules)
+### `optics/`
+
+```
+vocabulary.py   reserved words (dark, undefined), identifier shapes (ComponentName, Symbol, LightClass,
+                FunctionName), closed enums (Archetype, SourceFamily, SkyState, CoreFunction = obsplan
+                verbs lower-cased, VerdictKind, PortOwner)
+graph.py        the AUTHORED side: PositionsSpec (symbol -> vendor mapping), OpticsEdges (the edge grammar
+                `from` / `from: {X: port}` / `from: {X: [..]}` / `inputs: {pos: X}`, normalized by
+                .edges() to EdgeRef with an explicit PortOwner), GoalSpec / DetectorPaths (paths as goals),
+                DisplayHint, OpticalComponentSpec, TelescopeOpticsSpec (+ presets sugar)
+results.py      what the solver ANSWERS: SeesRecord {class, terminal, via}, the Verdict discriminated union
+                (Active / Settable / Collision / Impossible / Invalid), ConfigError, CheckResult
+compiled.py     OpticsCompiled — route table + conflict map, generated-then-verified in the config repo CI,
+                committed lockfile-style with `generated_from`
+conformance.py  ConformanceSuite — (graph, proven state) -> expected sees()/verdicts; the golden suite any
+                non-Python traversal (owies TypeScript) replays
+schema.py       JSON Schema export (`datamodels-export-schemas`) -> schemas/optics/*.schema.json
+```
+
+Conventions that **differ** from the observation models, deliberately:
+
+- **Grammar models are `extra="forbid"`** (`OpticsEdges`, `GoalSpec`, `EdgeRef`, results, compiled). The
+  whole point of the model is that a config typo fails at load time, not at 3 a.m. Only the models that
+  wrap device/vendor data stay `extra="allow"`: `PositionSpec` (vendor keys like `autoslew-name`),
+  `OpticalComponentSpec` / `TelescopeOpticsSpec` (device fields ride along), `DisplayHint`, `Environment`.
+- **Namespaces are separate.** `dark` is a reserved *light class* and also the DARK *function name*; the
+  reserved-word check applies to component names, position symbols and port references — never to
+  function names.
+- **Shape validation only.** Whether a referenced port exists, whether a `paths` goal is satisfiable, whether
+  two `from` edges collide on one port — that is the solver's `parse_graph` (ocabox-common) and comes back
+  as an `Invalid` verdict with `ConfigError`s. Don't pull cross-component checks into these models.
+- **Wire names win over Python names.** `SeesRecord.light_class` serializes as `"class"`; `OpticsEdges.from_`
+  as `"from"`. Always dump with `by_alias=True`. Hardware numbers (AutoSlew ports are 1-based) live only
+  inside `positions:` values; edges reference symbols.
+- The example `examples/optics_jk15_example.json` is the v4 jk15 sketch and is asserted to round-trip
+  byte-for-byte (`exclude_none=True`, `by_alias=True`).
+
+### Shared conventions (observation / projects_overview)
 
 - **Every model sets `model_config = ConfigDict(extra="allow")`.** The upstream pipeline attaches
   arbitrary extra fields (varies by instrument/reduction step/project); models must keep accepting

@@ -1,0 +1,270 @@
+{
+  "$defs": {
+    "DetectorPaths": {
+      "description": "``paths:`` on a detector — functions mapped to goals. Function names from\n:class:`~datamodels.optics.vocabulary.CoreFunction` carry a reserved meaning; others are\nfree.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/GoalSpec"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/GoalSpec"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "title": "DetectorPaths",
+      "type": "object"
+    },
+    "DisplayHint": {
+      "additionalProperties": true,
+      "description": "Presentational hints, ignored by the solver. ``color`` overrides the source-class colour of\na source component; ``x``/``y`` position a node for non-linear graphs (BESO branch).",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y"
+        }
+      },
+      "title": "DisplayHint",
+      "type": "object"
+    },
+    "GoalSpec": {
+      "additionalProperties": false,
+      "description": "The explicit goal form: *see this class, through these selector positions, when this\ncondition holds*. ``via`` pins the dark terminal (``dark_strict`` = railway flank\nprotection); ``when`` conditions the alternative on the sky state.",
+      "properties": {
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        },
+        "via": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Via",
+          "type": "object"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When"
+        }
+      },
+      "required": [
+        "see"
+      ],
+      "title": "GoalSpec",
+      "type": "object"
+    },
+    "OpticsEdges": {
+      "additionalProperties": false,
+      "description": "The ``optics:`` block of one component. Exactly one of ``from`` / ``inputs``.\n\nUse :meth:`edges` to get the normalized :class:`EdgeRef` list — that is the only form the\nsolver and renderers consume; the YAML sugar stops here.",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From"
+        },
+        "inputs": {
+          "anyOf": [
+            {
+              "patternProperties": {
+                "^[a-z][a-z0-9_]*$": {
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputs"
+        }
+      },
+      "title": "OpticsEdges",
+      "type": "object"
+    },
+    "PositionSpec": {
+      "additionalProperties": true,
+      "description": "Hardware mapping of one position symbol. The keys are vendor-specific and deliberately\nopen (``port``, ``autoslew-name``, ``slot`` …); the solver never reads them — only the\ndevice driver does, when resolving symbol -> hardware in ``optical_select(symbol)``.\n\nReference shape (jk15, shipped 2026-07-29; AutoSlew ports are 1-based)::\n\n    positions:\n      beso:  {port: 1, autoslew-name: 'ADR6'}\n      andor: {port: 2, autoslew-name: 'ADR10'}",
+      "properties": {
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        }
+      },
+      "title": "PositionSpec",
+      "type": "object"
+    },
+    "PositionsSpec": {
+      "description": "``positions:`` — the symbol vocabulary a selector declares. Edges downstream reference\nthese symbols and nothing else.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#/$defs/PositionSpec"
+        }
+      },
+      "title": "PositionsSpec",
+      "type": "object"
+    }
+  },
+  "$id": "https://araucaria-project.github.io/datamodels/optics/OpticalComponentSpec.schema.json",
+  "additionalProperties": true,
+  "description": "The optics-relevant view of one ``components:`` entry. Device fields (addresses, device\nnumbers, driver options) are carried through as extras and ignored; only ``kind`` is\nrequired because the archetype is derived from it.",
+  "properties": {
+    "display": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DisplayHint"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "kind": {
+      "title": "Kind",
+      "type": "string"
+    },
+    "optics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OpticsEdges"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "paths": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DetectorPaths"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "positions": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PositionsSpec"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "title": "OpticalComponentSpec",
+  "type": "object"
+}

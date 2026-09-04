@@ -1,0 +1,47 @@
+{
+  "components": {
+    "sky": {"kind": "sky"},
+    "flatscreen": {"kind": "flatscreen", "display": {"color": "#e0a030"}},
+    "dome": {
+      "kind": "dome",
+      "domeflat_az": 49.0,
+      "optics": {"inputs": {"open": "sky", "flat": "flatscreen"}}
+    },
+    "covercalibrator": {"kind": "covercalibrator", "optics": {"from": "dome"}},
+    "tertiary": {
+      "kind": "tertiaryOCA",
+      "device_number": 0,
+      "positions": {
+        "beso": {"port": 1, "autoslew-name": "ADR6"},
+        "andor": {"port": 2, "autoslew-name": "ADR10"}
+      },
+      "optics": {"from": "covercalibrator"}
+    },
+    "derotator": {"kind": "rotator", "optics": {"from": {"tertiary": "andor"}}},
+    "pickoff": {"kind": "splitter", "optics": {"from": "derotator"}},
+    "filterwheel": {"kind": "filterwheel", "optics": {"from": {"pickoff": "main"}}},
+    "guider": {"kind": "camera", "optics": {"from": {"pickoff": "guide"}}},
+    "camera": {
+      "kind": "camera",
+      "optics": {"from": "filterwheel"},
+      "paths": {
+        "object": "sky.science",
+        "snap": "sky.science",
+        "focus": "sky.science",
+        "skyflat": "sky.flat",
+        "domeflat": "flatscreen",
+        "zero": "dark",
+        "dark": "dark",
+        "dark_strict": [
+          {"see": "dark", "via": {"covercalibrator": "close"}, "when": "sky.science"},
+          {"see": "dark", "via": {"tertiary": "beso"}}
+        ]
+      }
+    },
+    "guider_beso": {"kind": "camera", "optics": {"from": {"tertiary": "beso"}}}
+  },
+  "presets": {
+    "imaging": {"camera": "object"},
+    "calibration": {"camera": "dark"}
+  }
+}

@@ -1,0 +1,793 @@
+{
+  "$defs": {
+    "Active": {
+      "additionalProperties": false,
+      "description": "The detector already sees the goal.",
+      "properties": {
+        "kind": {
+          "const": "active",
+          "default": "active",
+          "title": "Kind",
+          "type": "string"
+        },
+        "positions": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Positions",
+          "type": "object"
+        },
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        }
+      },
+      "required": [
+        "see"
+      ],
+      "title": "Active",
+      "type": "object"
+    },
+    "CheckResult": {
+      "additionalProperties": false,
+      "description": "``check(detector, function)`` — the verdict, addressed.",
+      "properties": {
+        "detector": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Detector",
+          "type": "string"
+        },
+        "function": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Function",
+          "type": "string"
+        },
+        "verdict": {
+          "discriminator": {
+            "mapping": {
+              "active": "#/$defs/Active",
+              "collision": "#/$defs/Collision",
+              "impossible": "#/$defs/Impossible",
+              "invalid": "#/$defs/Invalid",
+              "settable": "#/$defs/Settable"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Active"
+            },
+            {
+              "$ref": "#/$defs/Settable"
+            },
+            {
+              "$ref": "#/$defs/Collision"
+            },
+            {
+              "$ref": "#/$defs/Impossible"
+            },
+            {
+              "$ref": "#/$defs/Invalid"
+            }
+          ],
+          "title": "Verdict"
+        }
+      },
+      "required": [
+        "detector",
+        "function",
+        "verdict"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "Collision": {
+      "additionalProperties": false,
+      "description": "A required selector is held in a contradictory position. ``holder`` names who holds it when\nthe access grantor knows; the reason is human-readable and stable enough to display.",
+      "properties": {
+        "held": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Held",
+          "type": "string"
+        },
+        "holder": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Holder"
+        },
+        "kind": {
+          "const": "collision",
+          "default": "collision",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "required": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Required",
+          "type": "string"
+        },
+        "selector": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Selector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector",
+        "required",
+        "held",
+        "reason"
+      ],
+      "title": "Collision",
+      "type": "object"
+    },
+    "ConfigError": {
+      "additionalProperties": false,
+      "description": "One load-time problem with the authored graph.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "component": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Component"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ConfigError",
+      "type": "object"
+    },
+    "ConformanceVector": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "#/$defs/OpticalComponentSpec"
+            }
+          },
+          "title": "Components",
+          "type": "object"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "environment": {
+          "$ref": "#/$defs/Environment"
+        },
+        "expected_checks": {
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "title": "Expected Checks",
+          "type": "array"
+        },
+        "expected_sees": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "items": {
+                "$ref": "#/$defs/SeesRecord"
+              },
+              "type": "array"
+            }
+          },
+          "title": "Expected Sees",
+          "type": "object"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "state": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "#/$defs/SelectorState"
+            }
+          },
+          "title": "State",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "components",
+        "expected_sees"
+      ],
+      "title": "ConformanceVector",
+      "type": "object"
+    },
+    "DetectorPaths": {
+      "description": "``paths:`` on a detector — functions mapped to goals. Function names from\n:class:`~datamodels.optics.vocabulary.CoreFunction` carry a reserved meaning; others are\nfree.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/GoalSpec"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/GoalSpec"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "title": "DetectorPaths",
+      "type": "object"
+    },
+    "DisplayHint": {
+      "additionalProperties": true,
+      "description": "Presentational hints, ignored by the solver. ``color`` overrides the source-class colour of\na source component; ``x``/``y`` position a node for non-linear graphs (BESO branch).",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y"
+        }
+      },
+      "title": "DisplayHint",
+      "type": "object"
+    },
+    "Environment": {
+      "additionalProperties": true,
+      "description": "Inputs to derived selectors and stateful sources. Open — a new predicate adds a field.",
+      "properties": {
+        "dome_az_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dome Az Deg"
+        },
+        "mount_alt_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mount Alt Deg"
+        },
+        "mount_az_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mount Az Deg"
+        },
+        "sun_alt_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sun Alt Deg"
+        }
+      },
+      "title": "Environment",
+      "type": "object"
+    },
+    "GoalSpec": {
+      "additionalProperties": false,
+      "description": "The explicit goal form: *see this class, through these selector positions, when this\ncondition holds*. ``via`` pins the dark terminal (``dark_strict`` = railway flank\nprotection); ``when`` conditions the alternative on the sky state.",
+      "properties": {
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        },
+        "via": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Via",
+          "type": "object"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When"
+        }
+      },
+      "required": [
+        "see"
+      ],
+      "title": "GoalSpec",
+      "type": "object"
+    },
+    "Impossible": {
+      "additionalProperties": false,
+      "description": "No alternative of the goal can be provided now — typically the source class is\nunavailable (``sky.science`` in daytime) or every path crosses an ``undefined`` selector.",
+      "properties": {
+        "kind": {
+          "const": "impossible",
+          "default": "impossible",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "unavailable": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unavailable"
+        },
+        "undefined_at": {
+          "default": [],
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Undefined At",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "title": "Impossible",
+      "type": "object"
+    },
+    "Invalid": {
+      "additionalProperties": false,
+      "description": "Config error. Raised at load/deploy time by ``parse_graph``; never a runtime surprise.",
+      "properties": {
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/ConfigError"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "kind": {
+          "const": "invalid",
+          "default": "invalid",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "errors"
+      ],
+      "title": "Invalid",
+      "type": "object"
+    },
+    "OpticalComponentSpec": {
+      "additionalProperties": true,
+      "description": "The optics-relevant view of one ``components:`` entry. Device fields (addresses, device\nnumbers, driver options) are carried through as extras and ignored; only ``kind`` is\nrequired because the archetype is derived from it.",
+      "properties": {
+        "display": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisplayHint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "optics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpticsEdges"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "paths": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DetectorPaths"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "positions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PositionsSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "OpticalComponentSpec",
+      "type": "object"
+    },
+    "OpticsEdges": {
+      "additionalProperties": false,
+      "description": "The ``optics:`` block of one component. Exactly one of ``from`` / ``inputs``.\n\nUse :meth:`edges` to get the normalized :class:`EdgeRef` list — that is the only form the\nsolver and renderers consume; the YAML sugar stops here.",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From"
+        },
+        "inputs": {
+          "anyOf": [
+            {
+              "patternProperties": {
+                "^[a-z][a-z0-9_]*$": {
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputs"
+        }
+      },
+      "title": "OpticsEdges",
+      "type": "object"
+    },
+    "PositionSpec": {
+      "additionalProperties": true,
+      "description": "Hardware mapping of one position symbol. The keys are vendor-specific and deliberately\nopen (``port``, ``autoslew-name``, ``slot`` …); the solver never reads them — only the\ndevice driver does, when resolving symbol -> hardware in ``optical_select(symbol)``.\n\nReference shape (jk15, shipped 2026-07-29; AutoSlew ports are 1-based)::\n\n    positions:\n      beso:  {port: 1, autoslew-name: 'ADR6'}\n      andor: {port: 2, autoslew-name: 'ADR10'}",
+      "properties": {
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        }
+      },
+      "title": "PositionSpec",
+      "type": "object"
+    },
+    "PositionsSpec": {
+      "description": "``positions:`` — the symbol vocabulary a selector declares. Edges downstream reference\nthese symbols and nothing else.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#/$defs/PositionSpec"
+        }
+      },
+      "title": "PositionsSpec",
+      "type": "object"
+    },
+    "SeesRecord": {
+      "additionalProperties": false,
+      "description": "One thing a detector sees. ``sees(detector)`` returns a *set* of these — a cover-open +\ncalibrator-on state yields both ``sky.*`` and ``lamp``; a splitter yields several.\n\n``terminal`` is the source component — or, for ``dark``, the *blocking* component:\n``dark @ tertiary`` (looking at the back of M3) is not ``dark @ covercalibrator`` (closed\ncovers). For ``undefined`` it is the selector whose state is unknown.\n\n``via`` lists the components crossed between the terminal (exclusive) and the detector\n(exclusive), in the direction light travels — enough for a renderer to colour the edges.",
+      "properties": {
+        "class": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "Class",
+          "type": "string"
+        },
+        "terminal": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Terminal",
+          "type": "string"
+        },
+        "via": {
+          "default": [],
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Via",
+          "type": "array"
+        }
+      },
+      "required": [
+        "class",
+        "terminal"
+      ],
+      "title": "SeesRecord",
+      "type": "object"
+    },
+    "SelectorState": {
+      "additionalProperties": false,
+      "description": "Proven state of one selector as the solver sees it. ``position=None`` means the readback\nmaps to no declared symbol (the oca-problems#107 case: M3 reports \"2\"); together with\n``moving`` and ``stale`` that is exactly what makes a path ``undefined``.",
+      "properties": {
+        "moving": {
+          "default": false,
+          "title": "Moving",
+          "type": "boolean"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Position"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        }
+      },
+      "title": "SelectorState",
+      "type": "object"
+    },
+    "Settable": {
+      "additionalProperties": false,
+      "description": "Not active, but these selector moves make it so. ``moves`` is the subset of ``positions``\nthat differs from the proven state.",
+      "properties": {
+        "kind": {
+          "const": "settable",
+          "default": "settable",
+          "title": "Kind",
+          "type": "string"
+        },
+        "moves": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Moves",
+          "type": "object"
+        },
+        "positions": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Positions",
+          "type": "object"
+        },
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        }
+      },
+      "required": [
+        "see",
+        "positions",
+        "moves"
+      ],
+      "title": "Settable",
+      "type": "object"
+    }
+  },
+  "$id": "https://araucaria-project.github.io/datamodels/optics/ConformanceSuite.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "generated_from": {
+      "title": "Generated From",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "vectors": {
+      "items": {
+        "$ref": "#/$defs/ConformanceVector"
+      },
+      "title": "Vectors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "generated_from",
+    "vectors"
+  ],
+  "title": "ConformanceSuite",
+  "type": "object"
+}

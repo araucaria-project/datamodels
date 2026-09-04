@@ -1,0 +1,205 @@
+{
+  "$defs": {
+    "Conflict": {
+      "additionalProperties": false,
+      "description": "Two routes that cannot be active at once because they need the same selector in different\npositions. The reason is machine-generated and shown to the operator as-is.",
+      "properties": {
+        "a": {
+          "$ref": "#/$defs/RouteKey"
+        },
+        "a_requires": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "A Requires",
+          "type": "string"
+        },
+        "b": {
+          "$ref": "#/$defs/RouteKey"
+        },
+        "b_requires": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "B Requires",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "selector": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Selector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector",
+        "a",
+        "b",
+        "a_requires",
+        "b_requires",
+        "reason"
+      ],
+      "title": "Conflict",
+      "type": "object"
+    },
+    "Route": {
+      "additionalProperties": false,
+      "description": "One alternative of one detector function, fully resolved to selector positions.",
+      "properties": {
+        "alternative": {
+          "minimum": 0,
+          "title": "Alternative",
+          "type": "integer"
+        },
+        "detector": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Detector",
+          "type": "string"
+        },
+        "function": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Function",
+          "type": "string"
+        },
+        "positions": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Positions",
+          "type": "object"
+        },
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When"
+        }
+      },
+      "required": [
+        "detector",
+        "function",
+        "alternative",
+        "see",
+        "positions"
+      ],
+      "title": "Route",
+      "type": "object"
+    },
+    "RouteKey": {
+      "additionalProperties": false,
+      "properties": {
+        "alternative": {
+          "minimum": 0,
+          "title": "Alternative",
+          "type": "integer"
+        },
+        "detector": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Detector",
+          "type": "string"
+        },
+        "function": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Function",
+          "type": "string"
+        }
+      },
+      "required": [
+        "detector",
+        "function",
+        "alternative"
+      ],
+      "title": "RouteKey",
+      "type": "object"
+    },
+    "TelescopeCompiled": {
+      "additionalProperties": false,
+      "properties": {
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/Conflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "detectors": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Detectors",
+          "type": "array"
+        },
+        "routes": {
+          "items": {
+            "$ref": "#/$defs/Route"
+          },
+          "title": "Routes",
+          "type": "array"
+        },
+        "selectors": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Selectors",
+          "type": "array"
+        }
+      },
+      "title": "TelescopeCompiled",
+      "type": "object"
+    }
+  },
+  "$id": "https://araucaria-project.github.io/datamodels/optics/OpticsCompiled.schema.json",
+  "additionalProperties": false,
+  "description": "``optics_compiled`` — the whole observatory. ``generated_from`` is the hash of the authored\ninput the compiler consumed; CI fails on drift.",
+  "properties": {
+    "generated_from": {
+      "title": "Generated From",
+      "type": "string"
+    },
+    "generator": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Generator"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "telescopes": {
+      "additionalProperties": {
+        "$ref": "#/$defs/TelescopeCompiled"
+      },
+      "title": "Telescopes",
+      "type": "object"
+    }
+  },
+  "required": [
+    "generated_from"
+  ],
+  "title": "OpticsCompiled",
+  "type": "object"
+}

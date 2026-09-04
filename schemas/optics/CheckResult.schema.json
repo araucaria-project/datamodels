@@ -1,0 +1,295 @@
+{
+  "$defs": {
+    "Active": {
+      "additionalProperties": false,
+      "description": "The detector already sees the goal.",
+      "properties": {
+        "kind": {
+          "const": "active",
+          "default": "active",
+          "title": "Kind",
+          "type": "string"
+        },
+        "positions": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Positions",
+          "type": "object"
+        },
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        }
+      },
+      "required": [
+        "see"
+      ],
+      "title": "Active",
+      "type": "object"
+    },
+    "Collision": {
+      "additionalProperties": false,
+      "description": "A required selector is held in a contradictory position. ``holder`` names who holds it when\nthe access grantor knows; the reason is human-readable and stable enough to display.",
+      "properties": {
+        "held": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Held",
+          "type": "string"
+        },
+        "holder": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Holder"
+        },
+        "kind": {
+          "const": "collision",
+          "default": "collision",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "required": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Required",
+          "type": "string"
+        },
+        "selector": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Selector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector",
+        "required",
+        "held",
+        "reason"
+      ],
+      "title": "Collision",
+      "type": "object"
+    },
+    "ConfigError": {
+      "additionalProperties": false,
+      "description": "One load-time problem with the authored graph.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "component": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Component"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ConfigError",
+      "type": "object"
+    },
+    "Impossible": {
+      "additionalProperties": false,
+      "description": "No alternative of the goal can be provided now — typically the source class is\nunavailable (``sky.science`` in daytime) or every path crosses an ``undefined`` selector.",
+      "properties": {
+        "kind": {
+          "const": "impossible",
+          "default": "impossible",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "unavailable": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unavailable"
+        },
+        "undefined_at": {
+          "default": [],
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Undefined At",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "title": "Impossible",
+      "type": "object"
+    },
+    "Invalid": {
+      "additionalProperties": false,
+      "description": "Config error. Raised at load/deploy time by ``parse_graph``; never a runtime surprise.",
+      "properties": {
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/ConfigError"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "kind": {
+          "const": "invalid",
+          "default": "invalid",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "errors"
+      ],
+      "title": "Invalid",
+      "type": "object"
+    },
+    "Settable": {
+      "additionalProperties": false,
+      "description": "Not active, but these selector moves make it so. ``moves`` is the subset of ``positions``\nthat differs from the proven state.",
+      "properties": {
+        "kind": {
+          "const": "settable",
+          "default": "settable",
+          "title": "Kind",
+          "type": "string"
+        },
+        "moves": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Moves",
+          "type": "object"
+        },
+        "positions": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "title": "Positions",
+          "type": "object"
+        },
+        "see": {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "title": "See",
+          "type": "string"
+        }
+      },
+      "required": [
+        "see",
+        "positions",
+        "moves"
+      ],
+      "title": "Settable",
+      "type": "object"
+    }
+  },
+  "$id": "https://araucaria-project.github.io/datamodels/optics/CheckResult.schema.json",
+  "additionalProperties": false,
+  "description": "``check(detector, function)`` — the verdict, addressed.",
+  "properties": {
+    "detector": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Detector",
+      "type": "string"
+    },
+    "function": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Function",
+      "type": "string"
+    },
+    "verdict": {
+      "discriminator": {
+        "mapping": {
+          "active": "#/$defs/Active",
+          "collision": "#/$defs/Collision",
+          "impossible": "#/$defs/Impossible",
+          "invalid": "#/$defs/Invalid",
+          "settable": "#/$defs/Settable"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Active"
+        },
+        {
+          "$ref": "#/$defs/Settable"
+        },
+        {
+          "$ref": "#/$defs/Collision"
+        },
+        {
+          "$ref": "#/$defs/Impossible"
+        },
+        {
+          "$ref": "#/$defs/Invalid"
+        }
+      ],
+      "title": "Verdict"
+    }
+  },
+  "required": [
+    "detector",
+    "function",
+    "verdict"
+  ],
+  "title": "CheckResult",
+  "type": "object"
+}

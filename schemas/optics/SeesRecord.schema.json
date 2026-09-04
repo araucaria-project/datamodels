@@ -1,0 +1,32 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/SeesRecord.schema.json",
+  "additionalProperties": false,
+  "description": "One thing a detector sees. ``sees(detector)`` returns a *set* of these — a cover-open +\ncalibrator-on state yields both ``sky.*`` and ``lamp``; a splitter yields several.\n\n``terminal`` is the source component — or, for ``dark``, the *blocking* component:\n``dark @ tertiary`` (looking at the back of M3) is not ``dark @ covercalibrator`` (closed\ncovers). For ``undefined`` it is the selector whose state is unknown.\n\n``via`` lists the components crossed between the terminal (exclusive) and the detector\n(exclusive), in the direction light travels — enough for a renderer to colour the edges.",
+  "properties": {
+    "class": {
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+      "title": "Class",
+      "type": "string"
+    },
+    "terminal": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Terminal",
+      "type": "string"
+    },
+    "via": {
+      "default": [],
+      "items": {
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Via",
+      "type": "array"
+    }
+  },
+  "required": [
+    "class",
+    "terminal"
+  ],
+  "title": "SeesRecord",
+  "type": "object"
+}
