@@ -39,7 +39,11 @@ interpreter has neither `pytest` nor `datamodels` installed.
 
 There is no configured linter/formatter — don't invent lint commands. CI (`.github/workflows/ci.yml`)
 runs pytest on 3.11–3.13 and fails if the committed JSON Schemas under `schemas/optics/` drift from
-a fresh export.
+a fresh export. The export runs under the pinned generator (`schema.GENERATOR_PYDANTIC`, recorded in every
+file's `$comment`): pydantic's schema output changes between releases, so the library stays `pydantic>=2`
+while regeneration is `uv run --with pydantic==<pin> datamodels-export-schemas`; the exporter refuses any
+other version and the in-process drift test skips under one. Bumping the pin is a deliberate commit with
+the regenerated schemas in the same diff.
 
 Packaging uses `hatchling` (PEP 621 metadata in `pyproject.toml`); there is no `[tool.poetry]`
 section despite the tracked `poetry.lock`, so treat `uv` as the source of truth for the
@@ -123,7 +127,8 @@ compiled.py     OpticsCompiled — route table + conflict map, generated-then-ve
                 committed lockfile-style with `generated_from`
 conformance.py  ConformanceSuite — (graph, proven state) -> expected sees()/verdicts; the golden suite any
                 non-Python traversal (owies TypeScript) replays
-schema.py       JSON Schema export (`datamodels-export-schemas`) -> schemas/optics/*.schema.json
+schema.py       JSON Schema export (`datamodels-export-schemas`) -> schemas/optics/*.schema.json; the generator
+                pydantic is pinned (`GENERATOR_PYDANTIC`), regenerate with `uv run --with pydantic==<pin> datamodels-export-schemas`
 ```
 
 Conventions that **differ** from the observation models, deliberately:

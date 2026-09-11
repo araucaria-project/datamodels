@@ -19,8 +19,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: uv sync
       - run: uv run pytest -q
-      # the committed JSON Schemas are the contract TS clients generate from — drift fails here
-      - run: uv run datamodels-export-schemas && git diff --exit-code -- schemas/
+      # the committed JSON Schemas are the contract TS clients generate from — drift fails here.
+      # The generator is pinned (schema.GENERATOR_PYDANTIC), the library is not: the export runs
+      # under exactly that pydantic so a pydantic release cannot redden CI with unchanged sources.
+      - run: |
+          GEN=$(uv run python -c 'from datamodels.optics.schema import GENERATOR_PYDANTIC as v; print(v)')
+          uv run --with "pydantic==$GEN" datamodels-export-schemas && git diff --exit-code -- schemas/
 
   schemas:
     needs: test
@@ -31,7 +35,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync
-      - run: uv run datamodels-export-schemas
+      - run: |
+          GEN=$(uv run python -c 'from datamodels.optics.schema import GENERATOR_PYDANTIC as v; print(v)')
+          uv run --with "pydantic==$GEN" datamodels-export-schemas
       - uses: actions/upload-artifact@v4
         with:
           name: optics-json-schemas
