@@ -287,7 +287,8 @@
               "items": {
                 "$ref": "#/$defs/SeesRecord"
               },
-              "type": "array"
+              "type": "array",
+              "uniqueItems": true
             }
           },
           "propertyNames": {
@@ -1061,6 +1062,7 @@
       "type": "string"
     },
     "schema_version": {
+      "const": 1,
       "default": 1,
       "title": "Schema Version",
       "type": "integer"

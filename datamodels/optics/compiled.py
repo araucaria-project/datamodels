@@ -4,6 +4,8 @@ verified against it* in the config repo's CI, committed lockfile-style next to t
 clients still traverse the graph. The compiled artifact never contains runtime state.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, StateKey, Symbol
@@ -65,7 +67,7 @@ class OpticsCompiled(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: int = SCHEMA_VERSION
+    schema_version: Literal[1] = SCHEMA_VERSION  #: a future shape gets a new literal; an artifact from it must fail here, not be misread
     generated_from: str
     generator: str | None = None  #: e.g. ``ocabox-common 1.5.0``
     telescopes: dict[str, TelescopeCompiled] = Field(default_factory=dict)

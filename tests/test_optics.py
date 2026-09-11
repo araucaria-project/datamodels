@@ -307,6 +307,23 @@ class TestConformance:
         assert again.vectors[0].state["tertiary"].position is None
 
 
+class TestVersionedContracts:
+    def test_other_versions_and_duplicate_sees_are_rejected(self):
+        raw = json.loads(EXAMPLE_PATH.read_text())
+        rec = {"class": "dark", "terminal": "tertiary"}
+        good = {"generated_from": "x", "vectors": [{"name": "v", "components": raw["components"], "expected_sees": {"camera": [rec]}}]}
+        ConformanceSuite.model_validate(good)
+        with pytest.raises(ValidationError):
+            ConformanceSuite.model_validate({**good, "schema_version": 2})
+        with pytest.raises(ValidationError, match="duplicate"):
+            ConformanceSuite.model_validate({**good, "vectors": [{**good["vectors"][0], "expected_sees": {"camera": [rec, rec]}}]})
+        with pytest.raises(ValidationError):
+            OpticsCompiled.model_validate({"schema_version": 2, "generated_from": "x"})
+        schema = json_schemas()["ConformanceSuite"]
+        assert schema["properties"]["schema_version"]["const"] == 1
+        assert "uniqueItems" in json.dumps(schema)
+
+
 class TestJsonSchemaExport:
     def test_committed_schemas_match_a_fresh_export(self):
         fresh = json_schemas()

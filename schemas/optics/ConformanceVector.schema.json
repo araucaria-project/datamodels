@@ -1004,7 +1004,8 @@
           "items": {
             "$ref": "#/$defs/SeesRecord"
           },
-          "type": "array"
+          "type": "array",
+          "uniqueItems": true
         }
       },
       "propertyNames": {

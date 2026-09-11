@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 observation and project-tracking data for the ocabox TACOSS software (OCM, Araucaria Project).
 It has no runtime logic beyond the models themselves — no CLI, no service, no I/O layer.
 Consumers construct these models from JSON produced elsewhere in the TACOSS pipeline. There are
-currently two independent model modules:
+currently three independent model modules:
 
 - `datamodels/observation/observation.py` — a single observation's data (files, measurements, quality checks).
 - `datamodels/projects_overview/projects_overview.py` — a processing run's overview of projects/objects and their
