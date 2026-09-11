@@ -5,7 +5,6 @@
   "properties": {
     "kind": {
       "const": "impossible",
-      "default": "impossible",
       "title": "Kind",
       "type": "string"
     },
@@ -47,6 +46,7 @@
     }
   },
   "required": [
+    "kind",
     "reason"
   ],
   "title": "Impossible",

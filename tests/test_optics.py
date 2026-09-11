@@ -36,6 +36,7 @@ from datamodels.optics import (
     light_state,
     split_state_key,
     state_key,
+    VerdictKind,
 )
 from datamodels.optics.schema import DEFAULT_OUT_DIR, EXPORTED, json_schemas, render
 from jsonschema import Draft202012Validator
@@ -254,7 +255,7 @@ class TestResults:
             Route(detector="camera", function="object", alternative=0, see="undefined", positions={})
 
     def test_check_result_round_trip(self):
-        res = CheckResult(detector="camera", function="object", verdict=Active(see="sky.science"))
+        res = CheckResult(detector="camera", function="object", verdict=Active(kind=VerdictKind.ACTIVE, see="sky.science"))
         assert CheckResult.model_validate_json(res.model_dump_json()) == res
 
 
@@ -401,12 +402,20 @@ class TestSchemaSemantics:
         "raw, valid",
         [
             ({"beso": {"port": 1, "autoslew-name": "ADR6"}}, True),
+            ({"beso": {"port": "ADR6"}}, True),
+            ({"beso": {"port": True}}, False),
             ({"dark": {"port": 3}}, False),
             ({"ADR6": {"port": 1}}, False),
         ],
     )
     def test_positions_schema_rejects_reserved_and_malformed_symbols(self, raw, valid):
         assert self._validator("PositionsSpec").is_valid(raw) is valid
+        try:
+            PositionsSpec.model_validate(raw)
+            python_valid = True
+        except ValidationError:
+            python_valid = False
+        assert python_valid is valid
 
     @pytest.mark.parametrize(
         "raw, valid",
@@ -464,6 +473,26 @@ class TestSchemaSemantics:
         assert not settable.is_valid({**ok, "positions": {"dark.calibrator": "off"}})
         assert not settable.is_valid({**ok, "positions": {"covercalibrator.undefined": "off"}})
         assert not settable.is_valid({**ok, "positions": {"a.b.c": "off"}})
+
+    def test_verdict_tag_is_required_in_schema_and_python(self):
+        verdict = self._validator("Verdict")
+        untagged = {"see": "sky.science"}
+        assert not verdict.is_valid(untagged)
+        with pytest.raises(ValidationError):
+            TypeAdapter(Verdict).validate_python(untagged)
+        for name in ("Active", "Settable", "Collision", "Impossible", "Invalid"):
+            assert "kind" in json_schemas()[name]["required"]
+
+    def test_expected_sees_is_canonical_regardless_of_authored_order(self):
+        raw = json.loads(EXAMPLE_PATH.read_text())
+        a = {"class": "dark", "terminal": "tertiary"}
+        b = {"class": "lamp", "terminal": "covercalibrator", "via": ["tertiary"]}
+        vector = {"name": "v", "components": raw["components"], "expected_sees": {"camera": [a, b]}}
+        forward = ConformanceVector.model_validate(vector)
+        reversed_ = ConformanceVector.model_validate({**vector, "expected_sees": {"camera": [b, a]}})
+        assert forward == reversed_
+        assert forward.model_dump_json(by_alias=True) == reversed_.model_dump_json(by_alias=True)
+        assert [r.light_class for r in forward.expected_sees["camera"]] == ["dark", "lamp"]
 
     def test_verdict_schema_carries_the_invariants(self):
         verdict = self._validator("Verdict")

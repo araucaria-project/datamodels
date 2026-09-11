@@ -6,7 +6,6 @@
       "properties": {
         "kind": {
           "const": "active",
-          "default": "active",
           "title": "Kind",
           "type": "string"
         },
@@ -49,6 +48,7 @@
         }
       },
       "required": [
+        "kind",
         "see"
       ],
       "title": "Active",
@@ -142,7 +142,6 @@
         },
         "kind": {
           "const": "collision",
-          "default": "collision",
           "title": "Kind",
           "type": "string"
         },
@@ -178,6 +177,7 @@
         }
       },
       "required": [
+        "kind",
         "selector",
         "required",
         "held",
@@ -559,7 +559,6 @@
       "properties": {
         "kind": {
           "const": "impossible",
-          "default": "impossible",
           "title": "Kind",
           "type": "string"
         },
@@ -601,6 +600,7 @@
         }
       },
       "required": [
+        "kind",
         "reason"
       ],
       "title": "Impossible",
@@ -620,12 +620,12 @@
         },
         "kind": {
           "const": "invalid",
-          "default": "invalid",
           "title": "Kind",
           "type": "string"
         }
       },
       "required": [
+        "kind",
         "errors"
       ],
       "title": "Invalid",
@@ -973,7 +973,6 @@
       "properties": {
         "kind": {
           "const": "settable",
-          "default": "settable",
           "title": "Kind",
           "type": "string"
         },
@@ -1046,6 +1045,7 @@
         }
       },
       "required": [
+        "kind",
         "see",
         "positions",
         "moves"

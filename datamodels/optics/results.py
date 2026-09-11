@@ -46,7 +46,7 @@ class Active(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal[VerdictKind.ACTIVE] = VerdictKind.ACTIVE
+    kind: Literal[VerdictKind.ACTIVE]
     see: GoalClass  #: a satisfied goal is a goal: never ``undefined``
     positions: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)  #: proven selector positions on the path
 
@@ -57,7 +57,7 @@ class Settable(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal[VerdictKind.SETTABLE] = VerdictKind.SETTABLE
+    kind: Literal[VerdictKind.SETTABLE]
     see: GoalClass
     positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)
     #: at least one move — with nothing to move the verdict would be ``active``
@@ -70,7 +70,7 @@ class Collision(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal[VerdictKind.COLLISION] = VerdictKind.COLLISION
+    kind: Literal[VerdictKind.COLLISION]
     selector: StateKey
     required: Symbol
     held: Symbol
@@ -84,7 +84,7 @@ class Impossible(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal[VerdictKind.IMPOSSIBLE] = VerdictKind.IMPOSSIBLE
+    kind: Literal[VerdictKind.IMPOSSIBLE]
     reason: str
     unavailable: LightClass | None = None
     undefined_at: tuple[StateKey, ...] = ()
@@ -95,10 +95,11 @@ class Invalid(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal[VerdictKind.INVALID] = VerdictKind.INVALID
+    kind: Literal[VerdictKind.INVALID]
     errors: Annotated[list[ConfigError], Len(min_length=1)]  #: an invalid verdict always says why
 
 
+#: The tag is required on every variant — Python and the JSON Schema agree that an untagged verdict is no verdict.
 Verdict = Annotated[Active | Settable | Collision | Impossible | Invalid, Field(discriminator="kind")]
 
 

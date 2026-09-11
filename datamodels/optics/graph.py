@@ -19,7 +19,7 @@ Grammar (v4):
 from typing import Annotated, Any
 
 from annotated_types import Len
-from pydantic import BaseModel, ConfigDict, Field, RootModel, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, RootModel, StrictInt
 
 from datamodels.optics.vocabulary import (
     CLOSED_NAME_KEYS,
@@ -51,7 +51,7 @@ class PositionSpec(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    port: int | str | None = None
+    port: StrictInt | str | None = None  #: strict: a Boolean is not a port number, in Python as in the schema
 
 
 class PositionsSpec(RootModel[dict[Symbol, PositionSpec]]):

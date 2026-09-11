@@ -28,7 +28,6 @@
     },
     "kind": {
       "const": "collision",
-      "default": "collision",
       "title": "Kind",
       "type": "string"
     },
@@ -64,6 +63,7 @@
     }
   },
   "required": [
+    "kind",
     "selector",
     "required",
     "held",

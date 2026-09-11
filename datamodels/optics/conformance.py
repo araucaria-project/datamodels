@@ -40,14 +40,17 @@ class Environment(BaseModel):
     mount_alt_deg: float | None = None
 
 
-def _unique(records: list[SeesRecord]) -> list[SeesRecord]:
+def _canonical(records: list[SeesRecord]) -> list[SeesRecord]:
+    """Reject duplicates and store the set in one canonical order (by class, terminal, via), so
+    that equal sets compare and serialize equal whatever order the generator emitted them in."""
     if len(set(records)) != len(records):
         raise ValueError("expected_sees is a set: duplicate records")
-    return records
+    return sorted(records, key=lambda r: (r.light_class, r.terminal, r.via))
 
 
-#: ``sees()`` is a set: no duplicates, order-insensitive — enforced in Python and as ``uniqueItems`` in the schema.
-SeesSet = Annotated[list[SeesRecord], AfterValidator(_unique), Field(json_schema_extra={"uniqueItems": True})]
+#: ``sees()`` is a set: no duplicates (``uniqueItems`` in the schema), canonical order in Python. A
+#: replay client compares this field as a set — JSON Schema cannot express order-insensitivity.
+SeesSet = Annotated[list[SeesRecord], AfterValidator(_canonical), Field(json_schema_extra={"uniqueItems": True})]
 
 
 class ConformanceVector(BaseModel):

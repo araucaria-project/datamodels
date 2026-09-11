@@ -66,12 +66,12 @@
     },
     "kind": {
       "const": "invalid",
-      "default": "invalid",
       "title": "Kind",
       "type": "string"
     }
   },
   "required": [
+    "kind",
     "errors"
   ],
   "title": "Invalid",

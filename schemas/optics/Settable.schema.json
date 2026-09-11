@@ -5,7 +5,6 @@
   "properties": {
     "kind": {
       "const": "settable",
-      "default": "settable",
       "title": "Kind",
       "type": "string"
     },
@@ -78,6 +77,7 @@
     }
   },
   "required": [
+    "kind",
     "see",
     "positions",
     "moves"
