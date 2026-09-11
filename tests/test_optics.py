@@ -5,19 +5,23 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from datamodels.optics import (
-    DARK,
-    UNDEFINED,
     Active,
     CheckResult,
     Collision,
     ConfigError,
+    Conflict,
     ConformanceSuite,
     ConformanceVector,
     CoreFunction,
+    DARK,
     DetectorPaths,
+    DisplayHint,
     EdgeRef,
+    Environment,
     GoalSpec,
     Invalid,
+    light_family,
+    light_state,
     OpticalComponentSpec,
     OpticsCompiled,
     OpticsEdges,
@@ -25,17 +29,15 @@ from datamodels.optics import (
     PositionsSpec,
     Route,
     RouteKey,
-    Conflict,
     SeesRecord,
     SelectorState,
     Settable,
-    TelescopeCompiled,
-    TelescopeOpticsSpec,
-    Verdict,
-    light_family,
-    light_state,
     split_state_key,
     state_key,
+    TelescopeCompiled,
+    TelescopeOpticsSpec,
+    UNDEFINED,
+    Verdict,
     VerdictKind,
 )
 from datamodels.optics.schema import DEFAULT_OUT_DIR, EXPORTED, json_schemas, render
@@ -473,6 +475,40 @@ class TestSchemaSemantics:
         assert not settable.is_valid({**ok, "positions": {"dark.calibrator": "off"}})
         assert not settable.is_valid({**ok, "positions": {"covercalibrator.undefined": "off"}})
         assert not settable.is_valid({**ok, "positions": {"a.b.c": "off"}})
+
+    @pytest.mark.parametrize(
+        "name, model, raw, valid",
+        [
+            ("Environment", Environment, {"sun_alt_deg": -30}, True),
+            ("Environment", Environment, {"sun_alt_deg": -30.5, "dome_az_deg": 49, "mount_alt_deg": 15.0}, True),
+            ("Environment", Environment, {"sun_alt_deg": True}, False),
+            ("Environment", Environment, {"sun_alt_deg": "-30"}, False),
+            ("Environment", Environment, {"dome_az_deg": "49"}, False),
+            ("DisplayHint", DisplayHint, {"x": 1, "y": 2.5}, True),
+            ("DisplayHint", DisplayHint, {"x": True}, False),
+            ("DisplayHint", DisplayHint, {"x": "1"}, False),
+            ("SelectorState", SelectorState, {"position": None, "raw": 2}, True),
+            ("SelectorState", SelectorState, {"position": None, "raw": 2.5}, True),
+            ("SelectorState", SelectorState, {"position": None, "raw": "ADR6"}, True),
+            ("SelectorState", SelectorState, {"position": "open", "raw": True}, True),
+            ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": 0}, True),
+            ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": True}, False),
+            ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": "1"}, False),
+            ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": -1}, False),
+        ],
+    )
+    def test_numbers_are_json_numbers_in_schema_and_python(self, name, model, raw, valid):
+        assert self._validator(name).is_valid(raw) is valid
+        try:
+            model.model_validate(raw)
+            python_valid = True
+        except ValidationError:
+            python_valid = False
+        assert python_valid is valid
+
+    def test_boolean_readback_stays_boolean(self):
+        assert SelectorState.model_validate({"position": "open", "raw": True}).raw is True
+        assert SelectorState.model_validate({"position": None, "raw": 2}).raw == 2
 
     def test_verdict_tag_is_required_in_schema_and_python(self):
         verdict = self._validator("Verdict")

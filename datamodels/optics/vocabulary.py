@@ -10,7 +10,19 @@ Spec: knowledge-base ``Architecture/Optical Path Model.md``.
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import AfterValidator, StringConstraints, WithJsonSchema
+from annotated_types import Ge
+from pydantic import AfterValidator, Strict, StringConstraints, WithJsonSchema
+
+# --- numbers ------------------------------------------------------------------------------------
+# JSON has one number type; the schema says `number` / `integer`. Pydantic's lax mode would also
+# accept "1" or true here, so these are strict: what validates in Python validates in TypeScript.
+
+#: A JSON number (integer or float); never a string or Boolean.
+JsonNumber = Annotated[float, Strict()]
+#: A JSON integer; never a Boolean (Python's bool is an int) or a numeric string.
+JsonInteger = Annotated[int, Strict()]
+#: A 0-based ordinal.
+Index = Annotated[JsonInteger, Ge(0)]
 
 # --- reserved words ------------------------------------------------------------------------
 

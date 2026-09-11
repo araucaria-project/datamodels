@@ -10,7 +10,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from datamodels.optics.graph import OpticalComponentSpec
 from datamodels.optics.results import CheckResult, SeesRecord
-from datamodels.optics.vocabulary import CLOSED_NAME_KEYS, CLOSED_STATE_KEYS, ComponentName, StateKey, Symbol
+from datamodels.optics.vocabulary import CLOSED_NAME_KEYS, CLOSED_STATE_KEYS, ComponentName, JsonInteger, JsonNumber, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 
@@ -25,7 +25,7 @@ class SelectorState(BaseModel):
     position: Symbol | None = None
     moving: bool = False
     stale: bool = False
-    raw: str | int | float | None = None  #: the hardware readback, for the record
+    raw: bool | str | JsonInteger | JsonNumber | None = None  #: the hardware readback as reported (a Boolean stays a Boolean), for the record
 
 
 class Environment(BaseModel):
@@ -33,11 +33,11 @@ class Environment(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    sun_alt_deg: float | None = None
+    sun_alt_deg: JsonNumber | None = None
     dome_shutter_open: bool | None = None
-    dome_az_deg: float | None = None
-    mount_az_deg: float | None = None
-    mount_alt_deg: float | None = None
+    dome_az_deg: JsonNumber | None = None
+    mount_az_deg: JsonNumber | None = None
+    mount_alt_deg: JsonNumber | None = None
 
 
 def _canonical(records: list[SeesRecord]) -> list[SeesRecord]:

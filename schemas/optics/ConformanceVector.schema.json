@@ -843,6 +843,9 @@
         "raw": {
           "anyOf": [
             {
+              "type": "boolean"
+            },
+            {
               "type": "string"
             },
             {

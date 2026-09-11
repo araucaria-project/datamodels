@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, StateKey, Symbol
+from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, Index, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 
@@ -20,8 +20,8 @@ class Route(BaseModel):
 
     detector: ComponentName
     function: FunctionName
-    alternative: int = Field(ge=0)  #: index into the authored alternatives list (0 for a bare goal)
-    realization: int = Field(default=0, ge=0)  #: ordinal among the physical routes realising that alternative (a bare `dark` has several)
+    alternative: Index  #: index into the authored alternatives list (0 for a bare goal)
+    realization: Index = 0  #: ordinal among the physical routes realising that alternative (a bare `dark` has several)
     see: GoalClass  #: the authored goal this route realises — never ``undefined``
     positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)  #: every selector (and emitting aspect) on the path and the position it must hold for a *clean* view
     when: GoalClass | None = None
@@ -34,8 +34,8 @@ class RouteKey(BaseModel):
 
     detector: ComponentName
     function: FunctionName
-    alternative: int = Field(ge=0)
-    realization: int = Field(default=0, ge=0)
+    alternative: Index
+    realization: Index = 0
 
 
 class Conflict(BaseModel):

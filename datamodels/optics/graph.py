@@ -24,9 +24,10 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator, RootModel, S
 from datamodels.optics.vocabulary import (
     CLOSED_NAME_KEYS,
     CLOSED_STATE_KEYS,
-    GoalClass,
     ComponentName,
     FunctionName,
+    GoalClass,
+    JsonNumber,
     LightClass,
     PortOwner,
     StateKey,
@@ -219,8 +220,8 @@ class DisplayHint(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     color: str | None = None
-    x: float | None = None
-    y: float | None = None
+    x: JsonNumber | None = None
+    y: JsonNumber | None = None
 
 
 # --- a component, as optics sees it ------------------------------------------------------------
