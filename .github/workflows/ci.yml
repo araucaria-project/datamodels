@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -27,7 +27,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # release assets
+      contents: read   # generation only; publishing is a separate, tag-only job
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -37,17 +37,31 @@ jobs:
       - run: |
           GEN=$(uv run python -c 'from datamodels.optics.schema import GENERATOR_PYDANTIC as v; print(v)')
           uv run --with "pydantic==$GEN" datamodels-export-schemas schemas/optics
+          PKG=$(uv run python -c 'from datamodels.optics.schema import package_version as v; print(v())')
+          echo "$PKG" > schemas/optics/VERSION
       - uses: actions/upload-artifact@v4   # preview for reviewers on every PR / master push
         with:
           name: optics-json-schemas
-          path: schemas/optics/*.schema.json
+          path: schemas/optics/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: schemas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # the only job that may touch the repository: release + asset
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: optics-json-schemas
+          path: schemas/optics
       - name: Publish schemas with the release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           TAG=${GITHUB_REF_NAME}
-          PKG=$(uv run python -c 'from datamodels.optics.schema import package_version as v; print(v())')
+          PKG=$(cat schemas/optics/VERSION)
           test "v$PKG" = "$TAG" || { echo "tag $TAG does not match pyproject version $PKG"; exit 1; }
           (cd schemas/optics && zip -q "../../optics-schemas-$TAG.zip" ./*.schema.json)
           gh release create "$TAG" "optics-schemas-$TAG.zip" --verify-tag --generate-notes || gh release upload "$TAG" "optics-schemas-$TAG.zip" --clobber

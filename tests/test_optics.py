@@ -338,7 +338,9 @@ class TestJsonSchemaExport:
             export_json_schemas(tmp_path)
         assert not list(tmp_path.iterdir())
 
-    def test_export_prunes_schemas_of_contracts_that_no_longer_exist(self, tmp_path):
+    def test_export_prunes_schemas_of_contracts_that_no_longer_exist(self, tmp_path, monkeypatch):
+        import pydantic
+        monkeypatch.setattr(pydantic, "VERSION", GENERATOR_PYDANTIC)  # only the guard: the export itself is tested under any pydantic
         stale = tmp_path / "Renamed.schema.json"
         stale.write_text("{}")
         unrelated = tmp_path / "notes.json"
