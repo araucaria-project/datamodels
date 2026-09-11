@@ -8,11 +8,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 observation and project-tracking data for the ocabox TACOSS software (OCM, Araucaria Project).
 It has no runtime logic beyond the models themselves — no CLI, no service, no I/O layer.
 Consumers construct these models from JSON produced elsewhere in the TACOSS pipeline. There are
-currently two independent model modules:
+currently three independent model modules plus one shared one:
 
+- `datamodels/common/` — general-purpose definitions every model module may use: the strict JSON scalar
+  types (`JsonNumber`, `JsonInteger`, `JsonBool`, `Index`) that keep Python validation and the exported
+  JSON Schema in agreement. Anything cross-runtime and not domain-specific belongs here.
 - `datamodels/observation/observation.py` — a single observation's data (files, measurements, quality checks).
 - `datamodels/projects_overview/projects_overview.py` — a processing run's overview of projects/objects and their
   statuses.
+- `datamodels/optics/` — the **Optical Path Model v4** vocabularies and schemas (spec: knowledge-base
+  `Architecture/Optical Path Model.md`; epic araucaria-project/ocabox-server#27; this module:
+  araucaria-project/datamodels#10). Names and shapes only — the solver lives in ocabox-common.
 
 ## Commands
 
@@ -31,15 +37,18 @@ uv run python tests/test_observation.py  # each test file has a __main__ block c
 Always go through `uv run` — bare `python tests/test_observation.py` fails, since the system
 interpreter has neither `pytest` nor `datamodels` installed.
 
-There is no configured linter/formatter and no build/CI pipeline in this repo — don't invent
-lint commands.
+There is no configured linter/formatter — don't invent lint commands. CI (`.github/workflows/ci.yml`)
+runs pytest on 3.11–3.13; the `schemas` job exports the JSON Schemas under the pinned generator
+(`schema.GENERATOR_PYDANTIC`) as a preview artifact and, on a `v<version>` tag, attaches them to the GitHub
+Release. **Schemas are never committed** — the pydantic models are the only source of truth and the schema
+is a build artifact; `schemas/` is gitignored. The exporter refuses any pydantic other than the pin.
 
 Packaging uses `hatchling` (PEP 621 metadata in `pyproject.toml`); there is no `[tool.poetry]`
 section despite the tracked `poetry.lock`, so treat `uv` as the source of truth for the
 environment. `uv.lock` is gitignored (local-only).
 
-`requires-python = ">=3.11"` and the only runtime dependency is `pydantic>=2.0` — keep it that
-way; this package is imported by several TACOSS services and must stay dependency-light. Python
+`requires-python = ">=3.11,<4.0"` (the family-wide `^3.11`, see the knowledge-base note *Python version
+policy across the family*) and the only runtime dependency is `pydantic>=2.0` — keep it that way; this package is imported by several TACOSS services and must stay dependency-light. Python
 3.11 means built-in generics and `X | None` unions are fine without `from __future__ import
 annotations`.
 
@@ -100,7 +109,60 @@ implemented**, deliberately deferred.
 `ObjectOverview` has two fields commented out (`skymap`, `info`) — their shape isn't settled yet;
 don't uncomment/implement them without checking with the user first.
 
-### Shared conventions (both modules)
+### `optics/`
+
+```
+vocabulary.py   reserved words (dark, undefined), identifier shapes (ComponentName, Symbol, LightClass,
+                FunctionName, StateKey = selector or `selector.aspect`), closed enums (Archetype, SourceFamily, SkyState, CoreFunction = obsplan
+                verbs lower-cased, VerdictKind, PortOwner)
+graph.py        the AUTHORED side: PositionsSpec (symbol -> vendor mapping), OpticsEdges (the edge grammar
+                `from` / `from: {X: port}` / `from: {X: [..]}` / `inputs: {pos: X}`, normalized by
+                .edges() to EdgeRef with an explicit PortOwner), GoalSpec / DetectorPaths (paths as goals),
+                DisplayHint, OpticalComponentSpec, TelescopeOpticsSpec (+ presets sugar)
+results.py      what the solver ANSWERS: SeesRecord {class, terminal, via}, the Verdict discriminated union
+                (Active / Settable / Collision / Impossible / Invalid), ConfigError, CheckResult
+compiled.py     OpticsCompiled — route table + conflict map, generated-then-verified in the config repo CI,
+                committed lockfile-style with `generated_from`
+conformance.py  ConformanceSuite — (graph, proven state) -> expected sees()/verdicts; the golden suite any
+                non-Python traversal (owies TypeScript) replays
+schema.py       JSON Schema export (`datamodels-export-schemas`) -> schemas/optics/*.schema.json (gitignored build
+                artifact, published per release); generator pinned by `GENERATOR_PYDANTIC`
+```
+
+Conventions that **differ** from the observation models, deliberately:
+
+- **Grammar models are `extra="forbid"`** (`OpticsEdges`, `GoalSpec`, `EdgeRef`, results, compiled). The
+  whole point of the model is that a config typo fails at load time, not at 3 a.m. Only the models that
+  wrap device/vendor data stay `extra="allow"`: `PositionSpec` (vendor keys like `autoslew-name`),
+  `OpticalComponentSpec` / `TelescopeOpticsSpec` (device fields ride along), `DisplayHint`, `Environment`.
+- **Namespaces are separate.** `dark` is a reserved *light class* and also the DARK *function name*; the
+  reserved-word exclusion is part of the identifier *types* (`ComponentName`, `Symbol`, `StateKey`: an
+  `AfterValidator` plus a `not` clause in their JSON Schema) so results and compiled artifacts reject it
+  too — never `FunctionName` or `LightClass`.
+- **The exported schema is as strict as Python.** Grammar invariants that pydantic's generator cannot
+  derive from validators are stated explicitly (`json_schema_extra`: exactly-one-of `from`/`inputs`,
+  `additionalProperties: false` + `propertyNames` on constrained-key maps, `minItems`/`minProperties`
+  via `annotated_types.Len`). `tests/test_optics.py::TestSchemaSemantics` replays the same cases through
+  `jsonschema` and pydantic and asserts they agree — extend it whenever a validator is added.
+- **Every public contract is exported**: `EXPORTED` in `schema.py` is derived from `datamodels.optics.__all__`
+  (every `BaseModel` and `Enum` there, plus the `Verdict` union), one schema each in the release artifact — adding
+  a public model to `__all__` adds its schema; there is nothing to regenerate or commit.
+- A goal (`GoalSpec.see`/`when`, bare alternatives) is a `GoalClass`: any light class but `undefined`, enforced
+  by the type in Python and by a `not` clause in the schema.
+- **Multi-aspect selectors use the dotted state form.** Proven state, `via`, route positions and moves are
+  keyed by `StateKey`: a component name, or `component.aspect` for one axis of a device with several
+  (`covercalibrator` = the cover, `covercalibrator.calibrator` = its lamp). Which aspects exist is kind
+  contract (solver), never config. `SeesRecord.terminal` stays a plain `ComponentName`.
+- **Shape validation only.** Whether a referenced port exists, whether a `paths` goal is satisfiable, whether
+  two `from` edges collide on one port — that is the solver's `parse_graph` (ocabox-common) and comes back
+  as an `Invalid` verdict with `ConfigError`s. Don't pull cross-component checks into these models.
+- **Wire names win over Python names.** `SeesRecord.light_class` serializes as `"class"`; `OpticsEdges.from_`
+  as `"from"`. Always dump with `by_alias=True`. Hardware numbers (AutoSlew ports are 1-based) live only
+  inside `positions:` values; edges reference symbols.
+- The example `examples/optics_jk15_example.json` is the v4 jk15 sketch and is asserted to round-trip
+  byte-for-byte (`exclude_none=True`, `by_alias=True`).
+
+### Shared conventions (observation / projects_overview)
 
 - **Every model sets `model_config = ConfigDict(extra="allow")`.** The upstream pipeline attaches
   arbitrary extra fields (varies by instrument/reduction step/project); models must keep accepting

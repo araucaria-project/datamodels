@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datamodels"
-version = "0.2.2"
+version = "0.3.0"
 description = "Data Models used on ocabox TACOSS software (OCM)"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<4.0"
 dependencies = [
     "pydantic>=2.0",
 ]
@@ -15,7 +15,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.0",
+    "jsonschema>=4.20",
 ]
+
+[project.scripts]
+datamodels-export-schemas = "datamodels.optics.schema:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["datamodels"]
