@@ -10,7 +10,8 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from datamodels.optics.graph import OpticalComponentSpec
 from datamodels.optics.results import CheckResult, SeesRecord
-from datamodels.optics.vocabulary import CLOSED_NAME_KEYS, CLOSED_STATE_KEYS, ComponentName, JsonBool, JsonInteger, JsonNumber, StateKey, Symbol
+from datamodels.common import JsonBool, JsonInteger, JsonNumber
+from datamodels.optics.vocabulary import CLOSED_NAME_KEYS, CLOSED_STATE_KEYS, ComponentName, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 

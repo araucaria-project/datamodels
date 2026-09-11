@@ -21,13 +21,13 @@ from typing import Annotated, Any
 from annotated_types import Len
 from pydantic import BaseModel, ConfigDict, Field, model_validator, RootModel, StrictInt
 
+from datamodels.common import JsonNumber
 from datamodels.optics.vocabulary import (
     CLOSED_NAME_KEYS,
     CLOSED_STATE_KEYS,
     ComponentName,
     FunctionName,
     GoalClass,
-    JsonNumber,
     LightClass,
     PortOwner,
     StateKey,

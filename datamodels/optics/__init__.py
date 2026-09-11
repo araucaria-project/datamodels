@@ -36,10 +36,6 @@ from datamodels.optics.vocabulary import (
     UNDEFINED,
     Archetype,
     ComponentName,
-    Index,
-    JsonBool,
-    JsonInteger,
-    JsonNumber,
     CoreFunction,
     FunctionName,
     LightClass,
@@ -59,7 +55,7 @@ __all__ = [
     # vocabulary
     "DARK", "UNDEFINED", "RESERVED_WORDS",
     "Archetype", "SourceFamily", "SkyState", "CoreFunction", "VerdictKind", "PortOwner",
-    "ComponentName", "Symbol", "LightClass", "FunctionName", "StateKey", "JsonNumber", "JsonInteger", "JsonBool", "Index",
+    "ComponentName", "Symbol", "LightClass", "FunctionName", "StateKey",
     "light_family", "light_state", "state_key", "split_state_key",
     # authored grammar
     "PositionSpec", "PositionsSpec", "EdgeRef", "OpticsEdges", "GoalSpec", "GoalAlternative", "GoalExpr",

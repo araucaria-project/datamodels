@@ -10,22 +10,7 @@ Spec: knowledge-base ``Architecture/Optical Path Model.md``.
 from enum import StrEnum
 from typing import Annotated
 
-from annotated_types import Ge
-from pydantic import AfterValidator, Strict, StringConstraints, WithJsonSchema
-
-# --- numbers ------------------------------------------------------------------------------------
-# JSON has one number type; the schema says `number` / `integer`. Pydantic's lax mode would also
-# accept "1" or true here, so these are strict: what validates in Python validates in TypeScript.
-
-#: A JSON number (integer or float); never a string or Boolean.
-JsonNumber = Annotated[float, Strict()]
-#: A JSON integer; never a Boolean (Python's bool is an int) or a numeric string.
-JsonInteger = Annotated[int, Strict()]
-#: A 0-based ordinal.
-Index = Annotated[JsonInteger, Ge(0)]
-#: A JSON Boolean; never 0/1 or "false".
-JsonBool = Annotated[bool, Strict()]
-
+from pydantic import AfterValidator, StringConstraints, WithJsonSchema
 # --- reserved words ------------------------------------------------------------------------
 
 #: The detector looks at something that emits no light: a closed cover, the back of M3, a
@@ -167,15 +152,22 @@ class SkyState(StrEnum):
 
 
 class CoreFunction(StrEnum):
-    """Detector functions with a reserved meaning — the obsplan verbs, lower-cased. An observing
-    program resolves identically on every telescope because every telescope's ``paths:`` uses
-    these names for these purposes. Config may add extra functions freely."""
+    """Detector functions with a reserved meaning — the obsplan exposure verbs, lower-cased. The
+    model of the verbs is pyaraucaria's observing-plan syntax (``pyaraucaria/obs_plan/obsplan.md``);
+    ``flat`` and ``arc`` are the spectrograph-era additions (tpg#12): ``flat`` is the *purpose* — the
+    telescope's ``paths.flat`` says which light realises it in the current era — while ``skyflat``
+    and ``domeflat`` name the source explicitly. An observing program resolves identically on every
+    telescope because every telescope's ``paths:`` uses these names for these purposes. Config may
+    add extra functions freely; the plan-level verbs without an exposure (``WAIT``, ``STOP``) are not
+    detector functions."""
 
     OBJECT = "object"
     SNAP = "snap"
     FOCUS = "focus"
+    FLAT = "flat"
     SKYFLAT = "skyflat"
     DOMEFLAT = "domeflat"
+    ARC = "arc"
     DARK = "dark"
     ZERO = "zero"
 

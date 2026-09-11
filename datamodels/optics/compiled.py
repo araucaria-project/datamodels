@@ -8,7 +8,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, Index, StateKey, Symbol
+from datamodels.common import Index
+from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 

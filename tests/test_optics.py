@@ -49,7 +49,7 @@ SCHEMAS_DIR = Path(__file__).parent.parent / DEFAULT_OUT_DIR
 
 class TestVocabulary:
     def test_core_functions_are_the_obsplan_verbs(self):
-        assert {f.value for f in CoreFunction} == {"object", "snap", "focus", "skyflat", "domeflat", "dark", "zero"}
+        assert {f.value for f in CoreFunction} == {"object", "snap", "focus", "flat", "skyflat", "domeflat", "arc", "dark", "zero"}
 
     def test_light_class_helpers(self):
         assert light_family("sky.science") == "sky"
@@ -511,6 +511,13 @@ class TestSchemaSemantics:
         except ValidationError:
             python_valid = False
         assert python_valid is valid
+
+    def test_json_numbers_are_finite(self):
+        for bad in (float("nan"), float("inf"), float("-inf")):
+            with pytest.raises(ValidationError):
+                Environment(sun_alt_deg=bad)
+        with pytest.raises(ValidationError):
+            Environment.model_validate_json('{"sun_alt_deg": NaN}')
 
     def test_boolean_readback_stays_boolean(self):
         assert SelectorState.model_validate({"position": "open", "raw": True}).raw is True

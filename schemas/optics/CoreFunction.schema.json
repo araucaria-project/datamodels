@@ -1,12 +1,14 @@
 {
   "$id": "https://araucaria-project.github.io/datamodels/optics/CoreFunction.schema.json",
-  "description": "Detector functions with a reserved meaning — the obsplan verbs, lower-cased. An observing\nprogram resolves identically on every telescope because every telescope's ``paths:`` uses\nthese names for these purposes. Config may add extra functions freely.",
+  "description": "Detector functions with a reserved meaning — the obsplan exposure verbs, lower-cased. The\nmodel of the verbs is pyaraucaria's observing-plan syntax (``pyaraucaria/obs_plan/obsplan.md``);\n``flat`` and ``arc`` are the spectrograph-era additions (tpg#12): ``flat`` is the *purpose* — the\ntelescope's ``paths.flat`` says which light realises it in the current era — while ``skyflat``\nand ``domeflat`` name the source explicitly. An observing program resolves identically on every\ntelescope because every telescope's ``paths:`` uses these names for these purposes. Config may\nadd extra functions freely; the plan-level verbs without an exposure (``WAIT``, ``STOP``) are not\ndetector functions.",
   "enum": [
     "object",
     "snap",
     "focus",
+    "flat",
     "skyflat",
     "domeflat",
+    "arc",
     "dark",
     "zero"
   ],
