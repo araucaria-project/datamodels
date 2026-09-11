@@ -19,9 +19,9 @@ Grammar (v4):
 from typing import Annotated, Any
 
 from annotated_types import Len
-from pydantic import BaseModel, ConfigDict, Field, model_validator, RootModel, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, model_validator, RootModel
 
-from datamodels.common import JsonNumber
+from datamodels.common import JsonInteger, JsonNumber
 from datamodels.optics.vocabulary import (
     CLOSED_NAME_KEYS,
     CLOSED_STATE_KEYS,
@@ -52,7 +52,7 @@ class PositionSpec(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    port: StrictInt | str | None = None  #: strict: a Boolean is not a port number, in Python as in the schema
+    port: JsonInteger | str | None = None  #: a JSON integer or a string; never a Boolean
 
 
 class PositionsSpec(RootModel[dict[Symbol, PositionSpec]]):

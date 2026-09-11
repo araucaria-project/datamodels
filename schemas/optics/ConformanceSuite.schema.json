@@ -890,7 +890,6 @@
           "type": "string"
         },
         "via": {
-          "default": [],
           "items": {
             "not": {
               "enum": [
@@ -907,7 +906,8 @@
       },
       "required": [
         "class",
-        "terminal"
+        "terminal",
+        "via"
       ],
       "title": "SeesRecord",
       "type": "object"

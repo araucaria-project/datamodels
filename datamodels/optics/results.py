@@ -27,7 +27,7 @@ class SeesRecord(BaseModel):
 
     light_class: LightClass = Field(alias="class")
     terminal: ComponentName
-    via: tuple[ComponentName, ...] = ()
+    via: tuple[ComponentName, ...]  #: required on the wire, empty for a direct view — so that equal records are equal JSON objects
 
 
 class ConfigError(BaseModel):

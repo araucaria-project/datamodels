@@ -26,6 +26,7 @@ from datamodels.optics import (
     OpticsCompiled,
     OpticsEdges,
     PortOwner,
+    PositionSpec,
     PositionsSpec,
     Route,
     RouteKey,
@@ -74,7 +75,7 @@ class TestVocabulary:
     def test_reserved_words_share_the_light_class_shape(self):
         adapter = TypeAdapter(SeesRecord)
         for word in (DARK, UNDEFINED):
-            assert adapter.validate_python({"class": word, "terminal": "tertiary"}).light_class == word
+            assert adapter.validate_python({"class": word, "terminal": "tertiary", "via": []}).light_class == word
 
 
 class TestPositionsSpec:
@@ -217,7 +218,7 @@ class TestResults:
     def test_sees_record_uses_class_on_the_wire(self):
         rec = SeesRecord(light_class="dark", terminal="tertiary", via=("covercalibrator",))
         assert rec.model_dump(by_alias=True) == {"class": "dark", "terminal": "tertiary", "via": ("covercalibrator",)}
-        assert SeesRecord.model_validate({"class": "sky.science", "terminal": "sky"}).via == ()
+        assert SeesRecord.model_validate({"class": "sky.science", "terminal": "sky", "via": []}).via == ()
 
     def test_sees_records_are_set_members(self):
         a = SeesRecord(light_class="sky.science", terminal="sky", via=("dome", "covercalibrator"))
@@ -313,7 +314,7 @@ class TestConformance:
 class TestVersionedContracts:
     def test_other_versions_and_duplicate_sees_are_rejected(self):
         raw = json.loads(EXAMPLE_PATH.read_text())
-        rec = {"class": "dark", "terminal": "tertiary"}
+        rec = {"class": "dark", "terminal": "tertiary", "via": []}
         good = {"generated_from": "x", "vectors": [{"name": "v", "components": raw["components"], "expected_sees": {"camera": [rec]}}]}
         ConformanceSuite.model_validate(good)
         with pytest.raises(ValidationError):
@@ -459,10 +460,13 @@ class TestSchemaSemantics:
 
     def test_results_reject_reserved_component_references(self):
         sees = self._validator("SeesRecord")
-        assert sees.is_valid({"class": "dark", "terminal": "tertiary"})
-        assert not sees.is_valid({"class": "dark", "terminal": "dark"})
+        assert sees.is_valid({"class": "dark", "terminal": "tertiary", "via": []})
+        assert not sees.is_valid({"class": "dark", "terminal": "tertiary"})  # provenance is part of the record, on the wire too
+        assert not sees.is_valid({"class": "dark", "terminal": "dark", "via": []})
+        with pytest.raises(ValidationError):
+            SeesRecord.model_validate({"class": "dark", "terminal": "tertiary"})
         with pytest.raises(ValidationError, match="reserved word"):
-            SeesRecord.model_validate({"class": "dark", "terminal": "dark"})
+            SeesRecord.model_validate({"class": "dark", "terminal": "dark", "via": []})
         check = self._validator("CheckResult")
         assert not check.is_valid({"detector": "undefined", "function": "object", "verdict": {"kind": "active", "see": "sky.science"}})
         with pytest.raises(ValidationError, match="reserved word"):
@@ -501,6 +505,11 @@ class TestSchemaSemantics:
             ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": True}, False),
             ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": "1"}, False),
             ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": -1}, False),
+            ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": 1.0}, True),
+            ("RouteKey", RouteKey, {"detector": "camera", "function": "object", "alternative": 1.5}, False),
+            ("PositionSpec", PositionSpec, {"port": 2.0}, True),
+            ("PositionSpec", PositionSpec, {"port": 2.5}, False),
+            ("PositionSpec", PositionSpec, {"port": True}, False),
         ],
     )
     def test_numbers_are_json_numbers_in_schema_and_python(self, name, model, raw, valid):
@@ -511,6 +520,12 @@ class TestSchemaSemantics:
         except ValidationError:
             python_valid = False
         assert python_valid is valid
+
+    def test_integral_floats_are_integers_as_in_json_schema(self):
+        assert RouteKey.model_validate_json('{"detector": "camera", "function": "object", "alternative": 1.0}').alternative == 1
+        assert PositionSpec.model_validate_json('{"port": 2.0}').port == 2
+        with pytest.raises(ValidationError):
+            RouteKey.model_validate_json('{"detector": "camera", "function": "object", "alternative": 1.5}')
 
     def test_json_numbers_are_finite(self):
         for bad in (float("nan"), float("inf"), float("-inf")):
@@ -534,7 +549,7 @@ class TestSchemaSemantics:
 
     def test_expected_sees_is_canonical_regardless_of_authored_order(self):
         raw = json.loads(EXAMPLE_PATH.read_text())
-        a = {"class": "dark", "terminal": "tertiary"}
+        a = {"class": "dark", "terminal": "tertiary", "via": []}
         b = {"class": "lamp", "terminal": "covercalibrator", "via": ["tertiary"]}
         vector = {"name": "v", "components": raw["components"], "expected_sees": {"camera": [a, b]}}
         forward = ConformanceVector.model_validate(vector)
