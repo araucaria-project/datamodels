@@ -242,22 +242,13 @@ class OpticalComponentSpec(BaseModel):
 
 class TelescopeOpticsSpec(BaseModel):
     """One telescope's components plus optional whole-telescope preset sugar
-    (``presets: {name: {detector: function}}`` — an alias table, never truth)."""
+    (``presets: {name: {detector: function}}`` — an alias table, never truth).
+
+    Shape only: whether a preset names an existing detector and one of its declared paths is a
+    cross-component fact and is reported by the solver's ``parse_graph`` (``preset_unknown_detector``
+    / ``preset_unknown_path``), so Python and TypeScript consumers share one shape contract."""
 
     model_config = ConfigDict(extra="allow")
 
     components: dict[ComponentName, OpticalComponentSpec] = Field(json_schema_extra=CLOSED_NAME_KEYS)
     presets: dict[str, Annotated[dict[ComponentName, FunctionName], Field(json_schema_extra=CLOSED_NAME_KEYS)]] = Field(default_factory=dict)
-
-    @model_validator(mode="after")
-    def _presets_reference_declared_paths(self) -> "TelescopeOpticsSpec":
-        for preset, entries in self.presets.items():
-            for detector, function in entries.items():
-                component = self.components.get(detector)
-                if component is None:
-                    raise ValueError(f"presets.{preset}: unknown detector {detector!r}")
-                if component.paths is None or function not in component.paths:
-                    raise ValueError(
-                        f"presets.{preset}: detector {detector!r} declares no path {function!r}"
-                    )
-        return self

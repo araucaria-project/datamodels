@@ -124,6 +124,9 @@
           "type": "integer"
         },
         "see": {
+          "not": {
+            "const": "undefined"
+          },
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "See",
           "type": "string"
@@ -131,6 +134,9 @@
         "when": {
           "anyOf": [
             {
+              "not": {
+                "const": "undefined"
+              },
               "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
               "type": "string"
             },

@@ -40,6 +40,9 @@
           "type": "object"
         },
         "see": {
+          "not": {
+            "const": "undefined"
+          },
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "See",
           "type": "string"
@@ -236,6 +239,7 @@
           "items": {
             "$ref": "#/$defs/ConfigError"
           },
+          "minItems": 1,
           "title": "Errors",
           "type": "array"
         },
@@ -264,6 +268,7 @@
         },
         "moves": {
           "additionalProperties": false,
+          "minProperties": 1,
           "patternProperties": {
             "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "not": {
@@ -321,6 +326,9 @@
           "type": "object"
         },
         "see": {
+          "not": {
+            "const": "undefined"
+          },
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "See",
           "type": "string"

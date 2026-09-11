@@ -389,7 +389,7 @@
   },
   "$id": "https://araucaria-project.github.io/datamodels/optics/TelescopeOpticsSpec.schema.json",
   "additionalProperties": true,
-  "description": "One telescope's components plus optional whole-telescope preset sugar\n(``presets: {name: {detector: function}}`` — an alias table, never truth).",
+  "description": "One telescope's components plus optional whole-telescope preset sugar\n(``presets: {name: {detector: function}}`` — an alias table, never truth).\n\nShape only: whether a preset names an existing detector and one of its declared paths is a\ncross-component fact and is reported by the solver's ``parse_graph`` (``preset_unknown_detector``\n/ ``preset_unknown_path``), so Python and TypeScript consumers share one shape contract.",
   "properties": {
     "components": {
       "additionalProperties": false,

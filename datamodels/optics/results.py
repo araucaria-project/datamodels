@@ -4,9 +4,11 @@ CLI, TOI, the browser visualizer — consumes these shapes; none of them compute
 
 from typing import Annotated, Literal
 
+from annotated_types import Len
+
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, LightClass, StateKey, Symbol, VerdictKind
+from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, LightClass, StateKey, Symbol, VerdictKind
 
 
 class SeesRecord(BaseModel):
@@ -45,7 +47,7 @@ class Active(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal[VerdictKind.ACTIVE] = VerdictKind.ACTIVE
-    see: LightClass
+    see: GoalClass  #: a satisfied goal is a goal: never ``undefined``
     positions: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)  #: proven selector positions on the path
 
 
@@ -56,9 +58,10 @@ class Settable(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal[VerdictKind.SETTABLE] = VerdictKind.SETTABLE
-    see: LightClass
+    see: GoalClass
     positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)
-    moves: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)
+    #: at least one move — with nothing to move the verdict would be ``active``
+    moves: Annotated[dict[StateKey, Symbol], Len(min_length=1), Field(json_schema_extra=CLOSED_STATE_KEYS)]
 
 
 class Collision(BaseModel):
@@ -93,7 +96,7 @@ class Invalid(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal[VerdictKind.INVALID] = VerdictKind.INVALID
-    errors: list[ConfigError]
+    errors: Annotated[list[ConfigError], Len(min_length=1)]  #: an invalid verdict always says why
 
 
 Verdict = Annotated[Active | Settable | Collision | Impossible | Invalid, Field(discriminator="kind")]

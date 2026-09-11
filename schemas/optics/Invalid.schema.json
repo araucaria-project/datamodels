@@ -60,6 +60,7 @@
       "items": {
         "$ref": "#/$defs/ConfigError"
       },
+      "minItems": 1,
       "title": "Errors",
       "type": "array"
     },

@@ -199,13 +199,12 @@ class TestTelescopeOpticsSpec:
         with pytest.raises(ValidationError, match="reserved word"):
             TelescopeOpticsSpec.model_validate({"components": {"dark": {"kind": "beamdump"}}})
 
-    def test_presets_must_reference_declared_paths(self, raw):
-        bad = {**raw, "presets": {"x": {"camera": "spectroscopy"}}}
-        with pytest.raises(ValidationError, match="declares no path 'spectroscopy'"):
-            TelescopeOpticsSpec.model_validate(bad)
-        bad = {**raw, "presets": {"x": {"beso": "object"}}}
-        with pytest.raises(ValidationError, match="unknown detector 'beso'"):
-            TelescopeOpticsSpec.model_validate(bad)
+    def test_presets_are_shape_checked_only(self, raw):
+        # cross-component truth (does the detector exist, does it declare the path) is the solver's
+        spec = TelescopeOpticsSpec.model_validate({**raw, "presets": {"x": {"beso": "spectroscopy"}}})
+        assert spec.presets == {"x": {"beso": "spectroscopy"}}
+        with pytest.raises(ValidationError):
+            TelescopeOpticsSpec.model_validate({**raw, "presets": {"x": {"dark": "object"}}})
 
     def test_component_without_optics_is_fine(self):
         assert OpticalComponentSpec.model_validate({"kind": "switch", "address": "x"}).optics is None
@@ -241,6 +240,18 @@ class TestResults:
         )
         with pytest.raises(ValidationError):
             adapter.validate_python({"kind": "maybe"})
+
+    def test_verdict_invariants(self):
+        adapter = TypeAdapter(Verdict)
+        with pytest.raises(ValidationError):  # nothing to move ⇒ that would be `active`
+            adapter.validate_python({"kind": "settable", "see": "dark", "positions": {"tertiary": "beso"}, "moves": {}})
+        with pytest.raises(ValidationError):  # an invalid verdict always says why
+            adapter.validate_python({"kind": "invalid", "errors": []})
+        for kind in ("active", "settable"):
+            with pytest.raises(ValidationError):  # a satisfied or reachable goal is never `undefined`
+                adapter.validate_python({"kind": kind, "see": "undefined", "positions": {"a": "b"}, "moves": {"a": "b"}})
+        with pytest.raises(ValidationError):
+            Route(detector="camera", function="object", alternative=0, see="undefined", positions={})
 
     def test_check_result_round_trip(self):
         res = CheckResult(detector="camera", function="object", verdict=Active(see="sky.science"))
@@ -431,11 +442,20 @@ class TestSchemaSemantics:
 
     def test_state_key_schema(self):
         settable = self._validator("Verdict")
-        ok = {"kind": "settable", "see": "dark", "positions": {"covercalibrator.calibrator": "off"}, "moves": {}}
+        ok = {"kind": "settable", "see": "dark", "positions": {"covercalibrator.calibrator": "off"}, "moves": {"covercalibrator.calibrator": "off"}}
         assert settable.is_valid(ok)
         assert not settable.is_valid({**ok, "positions": {"dark.calibrator": "off"}})
         assert not settable.is_valid({**ok, "positions": {"covercalibrator.undefined": "off"}})
         assert not settable.is_valid({**ok, "positions": {"a.b.c": "off"}})
+
+    def test_verdict_schema_carries_the_invariants(self):
+        verdict = self._validator("Verdict")
+        assert not verdict.is_valid({"kind": "settable", "see": "dark", "positions": {"tertiary": "beso"}, "moves": {}})
+        assert not verdict.is_valid({"kind": "invalid", "errors": []})
+        assert not verdict.is_valid({"kind": "active", "see": "undefined"})
+        assert verdict.is_valid({"kind": "settable", "see": "dark", "positions": {"tertiary": "beso"}, "moves": {"tertiary": "beso"}})
+        route = self._validator("Route")
+        assert not route.is_valid({"detector": "camera", "function": "object", "alternative": 0, "see": "undefined", "positions": {}})
 
     def test_example_validates_against_the_exported_schema(self, ):
         raw = json.loads(EXAMPLE_PATH.read_text())
