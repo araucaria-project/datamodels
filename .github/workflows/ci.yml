@@ -24,7 +24,9 @@ jobs:
       # under exactly that pydantic so a pydantic release cannot redden CI with unchanged sources.
       - run: |
           GEN=$(uv run python -c 'from datamodels.optics.schema import GENERATOR_PYDANTIC as v; print(v)')
-          uv run --with "pydantic==$GEN" datamodels-export-schemas && git diff --exit-code -- schemas/
+          uv run --with "pydantic==$GEN" datamodels-export-schemas
+          # porcelain catches modified, added (untracked) and removed schema files alike
+          if [ -n "$(git status --porcelain -- schemas/)" ]; then git status --porcelain -- schemas/; git diff -- schemas/; exit 1; fi
 
   schemas:
     needs: test

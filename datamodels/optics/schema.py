@@ -84,6 +84,9 @@ def export_json_schemas(out_dir: Path = DEFAULT_OUT_DIR) -> dict[str, Path]:
         path = out_dir / f"{name}.schema.json"
         path.write_text(render(schema), encoding="utf-8")
         written[name] = path
+    for stale in out_dir.glob("*.schema.json"):
+        if stale not in written.values():
+            stale.unlink()  # a renamed or removed contract must not linger as a schema nobody exports
     return written
 
 

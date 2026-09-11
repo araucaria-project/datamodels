@@ -351,6 +351,16 @@ class TestJsonSchemaExport:
             export_json_schemas(tmp_path)
         assert not list(tmp_path.iterdir())
 
+    def test_export_prunes_schemas_of_contracts_that_no_longer_exist(self, tmp_path):
+        stale = tmp_path / "Renamed.schema.json"
+        stale.write_text("{}")
+        unrelated = tmp_path / "notes.json"
+        unrelated.write_text("{}")
+        written = export_json_schemas(tmp_path)
+        assert not stale.exists()
+        assert unrelated.exists()
+        assert {p.name for p in tmp_path.glob("*.schema.json")} == {p.name for p in written.values()}
+
     def test_every_public_contract_is_exported(self):
         names = set(EXPORTED)
         for required in ("EdgeRef", "OpticsEdges", "PositionsSpec", "PositionSpec", "DisplayHint", "GoalSpec",
