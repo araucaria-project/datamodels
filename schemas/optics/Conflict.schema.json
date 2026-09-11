@@ -2,6 +2,7 @@
   "$defs": {
     "RouteKey": {
       "additionalProperties": false,
+      "description": "Identity of one physical route: authored alternative plus its realization ordinal.",
       "properties": {
         "alternative": {
           "minimum": 0,
@@ -23,6 +24,12 @@
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Function",
           "type": "string"
+        },
+        "realization": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Realization",
+          "type": "integer"
         }
       },
       "required": [

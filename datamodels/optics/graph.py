@@ -19,12 +19,12 @@ Grammar (v4):
 from typing import Annotated, Any
 
 from annotated_types import Len
-from pydantic import BaseModel, ConfigDict, Field, RootModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, RootModel, model_validator
 
 from datamodels.optics.vocabulary import (
     CLOSED_NAME_KEYS,
     CLOSED_STATE_KEYS,
-    UNDEFINED,
+    GoalClass,
     ComponentName,
     FunctionName,
     LightClass,
@@ -77,7 +77,17 @@ class EdgeRef(BaseModel):
     """One normalized upstream edge. ``port`` is ``None`` for a passive edge; otherwise
     ``port_owner`` says whose port it is (see :class:`PortOwner`)."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        json_schema_extra={
+            # port and port_owner come together or not at all — stated for JSON Schema validators too
+            "oneOf": [
+                {"required": ["port", "port_owner"], "properties": {"port": {"type": "string"}, "port_owner": {"type": "string"}}},
+                {"properties": {"port": {"type": "null"}, "port_owner": {"type": "null"}}},
+            ]
+        },
+    )
 
     component: ComponentName
     port: Symbol | None = None
@@ -97,9 +107,10 @@ FromSpec = ComponentName | Annotated[dict[ComponentName, Ports], Len(min_length=
 
 #: Exactly one of ``from`` / ``inputs`` — stated in the schema, not only in Python.
 _EXACTLY_ONE_FORM = {
+    # `required` only checks presence, so each branch also pins the other form to null-or-absent and its own to non-null
     "oneOf": [
-        {"required": ["from"], "not": {"required": ["inputs"]}},
-        {"required": ["inputs"], "not": {"required": ["from"]}},
+        {"required": ["from"], "properties": {"from": {"not": {"type": "null"}}, "inputs": {"type": "null"}}},
+        {"required": ["inputs"], "properties": {"inputs": {"not": {"type": "null"}}, "from": {"type": "null"}}},
     ]
 }
 
@@ -162,20 +173,13 @@ class GoalSpec(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    see: LightClass
+    see: GoalClass
     via: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)
-    when: LightClass | None = None
-
-    @field_validator("see", "when")
-    @classmethod
-    def _goal_is_never_undefined(cls, value: str | None) -> str | None:
-        if value == UNDEFINED:
-            raise ValueError("a goal can never be 'undefined'")
-        return value
+    when: GoalClass | None = None
 
 
-#: One alternative of a goal: a bare light class or an explicit :class:`GoalSpec`.
-GoalAlternative = LightClass | GoalSpec
+#: One alternative of a goal: a bare light class (never ``undefined``) or an explicit :class:`GoalSpec`.
+GoalAlternative = GoalClass | GoalSpec
 
 #: What a detector function wants to see: a class, an explicit goal, or an ordered list of
 #: alternatives (first satisfiable wins).
@@ -188,18 +192,6 @@ class DetectorPaths(RootModel[dict[FunctionName, GoalExpr]]):
     free."""
 
     model_config = ConfigDict(json_schema_extra={"additionalProperties": False})  # `dark` is a legal function name here
-
-    @field_validator("root")
-    @classmethod
-    def _shape(cls, value: dict[str, GoalExpr]) -> dict[str, GoalExpr]:
-        # function names are their own namespace: `dark` is the DARK verb here, not the light class
-        for function, goal in value.items():
-            if isinstance(goal, list) and len(goal) == 0:
-                raise ValueError(f"paths.{function}: the alternatives list must not be empty")
-            for alt in goal if isinstance(goal, list) else [goal]:
-                if alt == UNDEFINED:
-                    raise ValueError(f"paths.{function}: a goal can never be 'undefined'")
-        return value
 
     def alternatives(self, function: str) -> list[GoalSpec]:
         """The goal of ``function`` as an ordered list of explicit :class:`GoalSpec`."""

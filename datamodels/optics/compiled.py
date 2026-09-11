@@ -19,17 +19,21 @@ class Route(BaseModel):
     detector: ComponentName
     function: FunctionName
     alternative: int = Field(ge=0)  #: index into the authored alternatives list (0 for a bare goal)
+    realization: int = Field(default=0, ge=0)  #: ordinal among the physical routes realising that alternative (a bare `dark` has several)
     see: LightClass
     positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)  #: every selector (and emitting aspect) on the path and the position it must hold for a *clean* view
     when: LightClass | None = None
 
 
 class RouteKey(BaseModel):
+    """Identity of one physical route: authored alternative plus its realization ordinal."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     detector: ComponentName
     function: FunctionName
     alternative: int = Field(ge=0)
+    realization: int = Field(default=0, ge=0)
 
 
 class Conflict(BaseModel):

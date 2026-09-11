@@ -1,0 +1,52 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Active.schema.json",
+  "additionalProperties": false,
+  "description": "The detector already sees the goal.",
+  "properties": {
+    "kind": {
+      "const": "active",
+      "default": "active",
+      "title": "Kind",
+      "type": "string"
+    },
+    "positions": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "anyOf": [
+            {
+              "pattern": "^(dark|undefined)(\\.|$)"
+            },
+            {
+              "pattern": "\\.(dark|undefined)$"
+            }
+          ]
+        }
+      },
+      "title": "Positions",
+      "type": "object"
+    },
+    "see": {
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+      "title": "See",
+      "type": "string"
+    }
+  },
+  "required": [
+    "see"
+  ],
+  "title": "Active",
+  "type": "object"
+}

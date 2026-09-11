@@ -1,0 +1,74 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Collision.schema.json",
+  "additionalProperties": false,
+  "description": "A required selector is held in a contradictory position. ``holder`` names who holds it when\nthe access grantor knows; the reason is human-readable and stable enough to display.",
+  "properties": {
+    "held": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Held",
+      "type": "string"
+    },
+    "holder": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Holder"
+    },
+    "kind": {
+      "const": "collision",
+      "default": "collision",
+      "title": "Kind",
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "required": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Required",
+      "type": "string"
+    },
+    "selector": {
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^(dark|undefined)(\\.|$)"
+          },
+          {
+            "pattern": "\\.(dark|undefined)$"
+          }
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+      "title": "Selector",
+      "type": "string"
+    }
+  },
+  "required": [
+    "selector",
+    "required",
+    "held",
+    "reason"
+  ],
+  "title": "Collision",
+  "type": "object"
+}

@@ -1,0 +1,41 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/RouteKey.schema.json",
+  "additionalProperties": false,
+  "description": "Identity of one physical route: authored alternative plus its realization ordinal.",
+  "properties": {
+    "alternative": {
+      "minimum": 0,
+      "title": "Alternative",
+      "type": "integer"
+    },
+    "detector": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Detector",
+      "type": "string"
+    },
+    "function": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Function",
+      "type": "string"
+    },
+    "realization": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Realization",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "detector",
+    "function",
+    "alternative"
+  ],
+  "title": "RouteKey",
+  "type": "object"
+}

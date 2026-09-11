@@ -5,6 +5,9 @@
       "description": "The explicit goal form: *see this class, through these selector positions, when this\ncondition holds*. ``via`` pins the dark terminal (``dark_strict`` = railway flank\nprotection); ``when`` conditions the alternative on the sky state.",
       "properties": {
         "see": {
+          "not": {
+            "const": "undefined"
+          },
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "See",
           "type": "string"
@@ -41,6 +44,9 @@
         "when": {
           "anyOf": [
             {
+              "not": {
+                "const": "undefined"
+              },
               "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
               "type": "string"
             },
@@ -66,6 +72,9 @@
     "^[a-z][a-z0-9_]*$": {
       "anyOf": [
         {
+          "not": {
+            "const": "undefined"
+          },
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "type": "string"
         },
@@ -76,6 +85,9 @@
           "items": {
             "anyOf": [
               {
+                "not": {
+                  "const": "undefined"
+                },
                 "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
                 "type": "string"
               },

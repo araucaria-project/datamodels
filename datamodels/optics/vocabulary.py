@@ -68,6 +68,22 @@ Symbol = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$"), AfterValidato
 #: ``dark`` and ``undefined`` share the shape so that a ``sees()`` result is one type.
 LightClass = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$")]
 
+
+def _not_undefined(value: str) -> str:
+    if value == UNDEFINED:
+        raise ValueError("a goal can never be 'undefined'")
+    return value
+
+
+#: A light class a detector may *ask for*: any class but ``undefined`` (``dark`` is a legitimate goal).
+#: Carries the exclusion in both runtime validation and JSON Schema.
+GoalClass = Annotated[
+    str,
+    StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$"),
+    AfterValidator(_not_undefined),
+    WithJsonSchema({"type": "string", "pattern": rf"^{_IDENT}(\.{_IDENT})?$", "not": {"const": UNDEFINED}}),
+]
+
 #: A detector function name — the key of a ``paths:`` entry (``object``, ``dark``, ``domeflat``).
 FunctionName = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$")]
 

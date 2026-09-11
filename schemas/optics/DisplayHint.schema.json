@@ -1,0 +1,45 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/DisplayHint.schema.json",
+  "additionalProperties": true,
+  "description": "Presentational hints, ignored by the solver. ``color`` overrides the source-class colour of\na source component; ``x``/``y`` position a node for non-linear graphs (BESO branch).",
+  "properties": {
+    "color": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Color"
+    },
+    "x": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "X"
+    },
+    "y": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Y"
+    }
+  },
+  "title": "DisplayHint",
+  "type": "object"
+}

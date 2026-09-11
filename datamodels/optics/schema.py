@@ -11,56 +11,31 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
-from datamodels.optics.compiled import Conflict, OpticsCompiled, Route, TelescopeCompiled
-from datamodels.optics.conformance import ConformanceSuite, ConformanceVector, Environment, SelectorState
-from datamodels.optics.graph import (
-    DetectorPaths,
-    EdgeRef,
-    GoalSpec,
-    OpticalComponentSpec,
-    OpticsEdges,
-    PositionsSpec,
-    TelescopeOpticsSpec,
-)
-from datamodels.optics.results import CheckResult, ConfigError, SeesRecord, Verdict
-from datamodels.optics.vocabulary import Archetype, CoreFunction, PortOwner, SkyState, SourceFamily, VerdictKind
+from enum import Enum
+
+from pydantic import BaseModel
+
+import datamodels.optics as optics
+from datamodels.optics.results import Verdict
 
 DEFAULT_OUT_DIR = Path("schemas") / "optics"
 
-#: name -> type; one schema file per entry. Every public optics contract, so TypeScript clients can
-#: generate all of them (composite schemas also embed their parts under ``$defs``).
-EXPORTED: dict[str, Any] = {
-    # authored grammar
-    "TelescopeOpticsSpec": TelescopeOpticsSpec,
-    "OpticalComponentSpec": OpticalComponentSpec,
-    "OpticsEdges": OpticsEdges,
-    "EdgeRef": EdgeRef,
-    "PositionsSpec": PositionsSpec,
-    "DetectorPaths": DetectorPaths,
-    "GoalSpec": GoalSpec,
-    # results
-    "SeesRecord": SeesRecord,
-    "Verdict": Verdict,
-    "CheckResult": CheckResult,
-    "ConfigError": ConfigError,
-    # compiled artifact
-    "OpticsCompiled": OpticsCompiled,
-    "TelescopeCompiled": TelescopeCompiled,
-    "Route": Route,
-    "Conflict": Conflict,
-    # conformance
-    "ConformanceSuite": ConformanceSuite,
-    "ConformanceVector": ConformanceVector,
-    "SelectorState": SelectorState,
-    "Environment": Environment,
-    # vocabulary
-    "Archetype": Archetype,
-    "SourceFamily": SourceFamily,
-    "SkyState": SkyState,
-    "CoreFunction": CoreFunction,
-    "VerdictKind": VerdictKind,
-    "PortOwner": PortOwner,
-}
+
+def _public_contracts() -> dict[str, Any]:
+    """Every public model and enum of ``datamodels.optics`` (from its ``__all__``), plus the
+    ``Verdict`` union — one schema file each, so the registry cannot drift from the package API.
+    Identifier aliases (``ComponentName`` …) are not contracts of their own; they appear inline."""
+    exported: dict[str, Any] = {}
+    for name in optics.__all__:
+        obj = getattr(optics, name)
+        if isinstance(obj, type) and (issubclass(obj, BaseModel) or issubclass(obj, Enum)):
+            exported[name] = obj
+    exported["Verdict"] = Verdict
+    return dict(sorted(exported.items()))
+
+
+#: name -> type; one schema file per entry
+EXPORTED: dict[str, Any] = _public_contracts()
 
 
 def json_schemas() -> dict[str, dict[str, Any]]:

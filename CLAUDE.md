@@ -138,8 +138,11 @@ Conventions that **differ** from the observation models, deliberately:
   `additionalProperties: false` + `propertyNames` on constrained-key maps, `minItems`/`minProperties`
   via `annotated_types.Len`). `tests/test_optics.py::TestSchemaSemantics` replays the same cases through
   `jsonschema` and pydantic and asserts they agree — extend it whenever a validator is added.
-- **Every public contract is exported** (`EXPORTED` in `schema.py`): grammar parts, results, compiled
-  artifact parts, conformance parts and the vocabulary enums, one file each under `schemas/optics/`.
+- **Every public contract is exported**: `EXPORTED` in `schema.py` is derived from `datamodels.optics.__all__`
+  (every `BaseModel` and `Enum` there, plus the `Verdict` union), one file each under `schemas/optics/` — adding
+  a public model to `__all__` adds its schema; forgetting to regenerate fails the drift test.
+- A goal (`GoalSpec.see`/`when`, bare alternatives) is a `GoalClass`: any light class but `undefined`, enforced
+  by the type in Python and by a `not` clause in the schema.
 - **Multi-aspect selectors use the dotted state form.** Proven state, `via`, route positions and moves are
   keyed by `StateKey`: a component name, or `component.aspect` for one axis of a device with several
   (`covercalibrator` = the cover, `covercalibrator.calibrator` = its lamp). Which aspects exist is kind

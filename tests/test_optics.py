@@ -249,7 +249,7 @@ class TestResults:
 
 class TestCompiled:
     def test_round_trip(self):
-        key_a = RouteKey(detector="camera", function="object", alternative=0)
+        key_a = RouteKey(detector="camera", function="object", alternative=0, realization=0)
         key_b = RouteKey(detector="guider_beso", function="object", alternative=0)
         compiled = OpticsCompiled(
             generated_from="sha256:abc",
@@ -308,9 +308,17 @@ class TestJsonSchemaExport:
 
     def test_every_public_contract_is_exported(self):
         names = set(EXPORTED)
-        for required in ("EdgeRef", "OpticsEdges", "PositionsSpec", "GoalSpec", "SelectorState", "Environment",
-                         "Route", "Conflict", "ConfigError", "Archetype", "CoreFunction", "VerdictKind", "PortOwner"):
+        for required in ("EdgeRef", "OpticsEdges", "PositionsSpec", "PositionSpec", "DisplayHint", "GoalSpec",
+                         "SelectorState", "Environment", "Route", "RouteKey", "Conflict", "ConfigError",
+                         "Active", "Settable", "Collision", "Impossible", "Invalid", "Verdict",
+                         "Archetype", "CoreFunction", "VerdictKind", "PortOwner"):
             assert required in names
+        import datamodels.optics as optics
+        from enum import Enum
+        from pydantic import BaseModel
+        public = {n for n in optics.__all__ if isinstance(getattr(optics, n), type)
+                  and (issubclass(getattr(optics, n), BaseModel) or issubclass(getattr(optics, n), Enum))}
+        assert public <= names
 
     def test_wire_names_survive_in_schema(self):
         sees = json_schemas()["SeesRecord"]
@@ -347,6 +355,9 @@ class TestSchemaSemantics:
             ({"from": {"dark": "p"}}, False),
             ({"inputs": {"Open": "sky"}}, False),
             ({"from": "a", "colour": "red"}, False),
+            ({"from": None}, False),
+            ({"inputs": None}, False),
+            ({"from": "a", "inputs": None}, True),
         ],
     )
     def test_optics_edges_schema_matches_python(self, raw, valid):
@@ -368,6 +379,44 @@ class TestSchemaSemantics:
     )
     def test_positions_schema_rejects_reserved_and_malformed_symbols(self, raw, valid):
         assert self._validator("PositionsSpec").is_valid(raw) is valid
+
+    @pytest.mark.parametrize(
+        "raw, valid",
+        [
+            ({"component": "dome"}, True),
+            ({"component": "tertiary", "port": "andor", "port_owner": "upstream"}, True),
+            ({"component": "dome", "port": "open"}, False),
+            ({"component": "dome", "port_owner": "self"}, False),
+            ({"component": "dome", "port": "open", "port_owner": None}, False),
+        ],
+    )
+    def test_edge_ref_port_and_owner_come_together(self, raw, valid):
+        assert self._validator("EdgeRef").is_valid(raw) is valid
+        try:
+            EdgeRef.model_validate(raw)
+            python_valid = True
+        except ValidationError:
+            python_valid = False
+        assert python_valid is valid
+
+    @pytest.mark.parametrize(
+        "raw, valid",
+        [
+            ({"object": "sky.science", "dark": "dark"}, True),
+            ({"object": "undefined"}, False),
+            ({"object": {"see": "undefined"}}, False),
+            ({"object": {"see": "dark", "when": "undefined"}}, False),
+            ({"object": []}, False),
+        ],
+    )
+    def test_goals_never_undefined_in_schema_and_python(self, raw, valid):
+        assert self._validator("DetectorPaths").is_valid(raw) is valid
+        try:
+            DetectorPaths.model_validate(raw)
+            python_valid = True
+        except ValidationError:
+            python_valid = False
+        assert python_valid is valid
 
     def test_results_reject_reserved_component_references(self):
         sees = self._validator("SeesRecord")

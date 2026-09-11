@@ -53,6 +53,12 @@
       "title": "Positions",
       "type": "object"
     },
+    "realization": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Realization",
+      "type": "integer"
+    },
     "see": {
       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
       "title": "See",

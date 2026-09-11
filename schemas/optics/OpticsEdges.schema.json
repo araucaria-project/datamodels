@@ -4,20 +4,30 @@
   "description": "The ``optics:`` block of one component. Exactly one of ``from`` / ``inputs``.\n\nUse :meth:`edges` to get the normalized :class:`EdgeRef` list — that is the only form the\nsolver and renderers consume; the YAML sugar stops here.",
   "oneOf": [
     {
-      "not": {
-        "required": [
-          "inputs"
-        ]
+      "properties": {
+        "from": {
+          "not": {
+            "type": "null"
+          }
+        },
+        "inputs": {
+          "type": "null"
+        }
       },
       "required": [
         "from"
       ]
     },
     {
-      "not": {
-        "required": [
-          "from"
-        ]
+      "properties": {
+        "from": {
+          "type": "null"
+        },
+        "inputs": {
+          "not": {
+            "type": "null"
+          }
+        }
       },
       "required": [
         "inputs"

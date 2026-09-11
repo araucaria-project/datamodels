@@ -1,0 +1,83 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Settable.schema.json",
+  "additionalProperties": false,
+  "description": "Not active, but these selector moves make it so. ``moves`` is the subset of ``positions``\nthat differs from the proven state.",
+  "properties": {
+    "kind": {
+      "const": "settable",
+      "default": "settable",
+      "title": "Kind",
+      "type": "string"
+    },
+    "moves": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "anyOf": [
+            {
+              "pattern": "^(dark|undefined)(\\.|$)"
+            },
+            {
+              "pattern": "\\.(dark|undefined)$"
+            }
+          ]
+        }
+      },
+      "title": "Moves",
+      "type": "object"
+    },
+    "positions": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "anyOf": [
+            {
+              "pattern": "^(dark|undefined)(\\.|$)"
+            },
+            {
+              "pattern": "\\.(dark|undefined)$"
+            }
+          ]
+        }
+      },
+      "title": "Positions",
+      "type": "object"
+    },
+    "see": {
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+      "title": "See",
+      "type": "string"
+    }
+  },
+  "required": [
+    "see",
+    "positions",
+    "moves"
+  ],
+  "title": "Settable",
+  "type": "object"
+}

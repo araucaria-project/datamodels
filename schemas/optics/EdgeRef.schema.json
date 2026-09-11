@@ -13,6 +13,32 @@
   "$id": "https://araucaria-project.github.io/datamodels/optics/EdgeRef.schema.json",
   "additionalProperties": false,
   "description": "One normalized upstream edge. ``port`` is ``None`` for a passive edge; otherwise\n``port_owner`` says whose port it is (see :class:`PortOwner`).",
+  "oneOf": [
+    {
+      "properties": {
+        "port": {
+          "type": "string"
+        },
+        "port_owner": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "port",
+        "port_owner"
+      ]
+    },
+    {
+      "properties": {
+        "port": {
+          "type": "null"
+        },
+        "port_owner": {
+          "type": "null"
+        }
+      }
+    }
+  ],
   "properties": {
     "component": {
       "not": {
