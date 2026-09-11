@@ -1,0 +1,99 @@
+{
+  "$defs": {
+    "RouteKey": {
+      "additionalProperties": false,
+      "properties": {
+        "alternative": {
+          "minimum": 0,
+          "title": "Alternative",
+          "type": "integer"
+        },
+        "detector": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Detector",
+          "type": "string"
+        },
+        "function": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Function",
+          "type": "string"
+        }
+      },
+      "required": [
+        "detector",
+        "function",
+        "alternative"
+      ],
+      "title": "RouteKey",
+      "type": "object"
+    }
+  },
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Conflict.schema.json",
+  "additionalProperties": false,
+  "description": "Two routes that cannot be active at once because they need the same selector in different\npositions. The reason is machine-generated and shown to the operator as-is.",
+  "properties": {
+    "a": {
+      "$ref": "#/$defs/RouteKey"
+    },
+    "a_requires": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "A Requires",
+      "type": "string"
+    },
+    "b": {
+      "$ref": "#/$defs/RouteKey"
+    },
+    "b_requires": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "B Requires",
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "selector": {
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "^(dark|undefined)(\\.|$)"
+          },
+          {
+            "pattern": "\\.(dark|undefined)$"
+          }
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+      "title": "Selector",
+      "type": "string"
+    }
+  },
+  "required": [
+    "selector",
+    "a",
+    "b",
+    "a_requires",
+    "b_requires",
+    "reason"
+  ],
+  "title": "Conflict",
+  "type": "object"
+}

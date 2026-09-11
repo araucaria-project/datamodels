@@ -11,22 +11,55 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
-from datamodels.optics.compiled import OpticsCompiled
-from datamodels.optics.conformance import ConformanceSuite
-from datamodels.optics.graph import OpticalComponentSpec, TelescopeOpticsSpec
-from datamodels.optics.results import CheckResult, SeesRecord, Verdict
+from datamodels.optics.compiled import Conflict, OpticsCompiled, Route, TelescopeCompiled
+from datamodels.optics.conformance import ConformanceSuite, ConformanceVector, Environment, SelectorState
+from datamodels.optics.graph import (
+    DetectorPaths,
+    EdgeRef,
+    GoalSpec,
+    OpticalComponentSpec,
+    OpticsEdges,
+    PositionsSpec,
+    TelescopeOpticsSpec,
+)
+from datamodels.optics.results import CheckResult, ConfigError, SeesRecord, Verdict
+from datamodels.optics.vocabulary import Archetype, CoreFunction, PortOwner, SkyState, SourceFamily, VerdictKind
 
 DEFAULT_OUT_DIR = Path("schemas") / "optics"
 
-#: name -> type; one schema file per entry
+#: name -> type; one schema file per entry. Every public optics contract, so TypeScript clients can
+#: generate all of them (composite schemas also embed their parts under ``$defs``).
 EXPORTED: dict[str, Any] = {
+    # authored grammar
     "TelescopeOpticsSpec": TelescopeOpticsSpec,
     "OpticalComponentSpec": OpticalComponentSpec,
+    "OpticsEdges": OpticsEdges,
+    "EdgeRef": EdgeRef,
+    "PositionsSpec": PositionsSpec,
+    "DetectorPaths": DetectorPaths,
+    "GoalSpec": GoalSpec,
+    # results
     "SeesRecord": SeesRecord,
     "Verdict": Verdict,
     "CheckResult": CheckResult,
+    "ConfigError": ConfigError,
+    # compiled artifact
     "OpticsCompiled": OpticsCompiled,
+    "TelescopeCompiled": TelescopeCompiled,
+    "Route": Route,
+    "Conflict": Conflict,
+    # conformance
     "ConformanceSuite": ConformanceSuite,
+    "ConformanceVector": ConformanceVector,
+    "SelectorState": SelectorState,
+    "Environment": Environment,
+    # vocabulary
+    "Archetype": Archetype,
+    "SourceFamily": SourceFamily,
+    "SkyState": SkyState,
+    "CoreFunction": CoreFunction,
+    "VerdictKind": VerdictKind,
+    "PortOwner": PortOwner,
 }
 
 

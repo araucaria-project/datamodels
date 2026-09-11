@@ -1,0 +1,13 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Archetype.schema.json",
+  "description": "What a component does to light. Derived from ``kind`` by an explicit registry in code\n(ocabox-server), never from config strings. Also the drawing glyph.",
+  "enum": [
+    "source",
+    "selector",
+    "splitter",
+    "passive",
+    "detector"
+  ],
+  "title": "Archetype",
+  "type": "string"
+}

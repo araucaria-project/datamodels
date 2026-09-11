@@ -234,105 +234,6 @@
       "title": "ConfigError",
       "type": "object"
     },
-    "ConformanceVector": {
-      "additionalProperties": false,
-      "properties": {
-        "components": {
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
-              "$ref": "#/$defs/OpticalComponentSpec"
-            }
-          },
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "dark",
-                "undefined"
-              ]
-            }
-          },
-          "title": "Components",
-          "type": "object"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Description"
-        },
-        "environment": {
-          "$ref": "#/$defs/Environment"
-        },
-        "expected_checks": {
-          "items": {
-            "$ref": "#/$defs/CheckResult"
-          },
-          "title": "Expected Checks",
-          "type": "array"
-        },
-        "expected_sees": {
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
-              "items": {
-                "$ref": "#/$defs/SeesRecord"
-              },
-              "type": "array"
-            }
-          },
-          "propertyNames": {
-            "not": {
-              "enum": [
-                "dark",
-                "undefined"
-              ]
-            }
-          },
-          "title": "Expected Sees",
-          "type": "object"
-        },
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "state": {
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
-              "$ref": "#/$defs/SelectorState"
-            }
-          },
-          "propertyNames": {
-            "not": {
-              "anyOf": [
-                {
-                  "pattern": "^(dark|undefined)(\\.|$)"
-                },
-                {
-                  "pattern": "\\.(dark|undefined)$"
-                }
-              ]
-            }
-          },
-          "title": "State",
-          "type": "object"
-        }
-      },
-      "required": [
-        "name",
-        "components",
-        "expected_sees"
-      ],
-      "title": "ConformanceVector",
-      "type": "object"
-    },
     "DetectorPaths": {
       "additionalProperties": false,
       "description": "``paths:`` on a detector — functions mapped to goals. Function names from\n:class:`~datamodels.optics.vocabulary.CoreFunction` carry a reserved meaning; others are\nfree.",
@@ -1023,30 +924,102 @@
       "type": "object"
     }
   },
-  "$id": "https://araucaria-project.github.io/datamodels/optics/ConformanceSuite.schema.json",
+  "$id": "https://araucaria-project.github.io/datamodels/optics/ConformanceVector.schema.json",
   "additionalProperties": false,
   "properties": {
-    "generated_from": {
-      "title": "Generated From",
+    "components": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#/$defs/OpticalComponentSpec"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "dark",
+            "undefined"
+          ]
+        }
+      },
+      "title": "Components",
+      "type": "object"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "environment": {
+      "$ref": "#/$defs/Environment"
+    },
+    "expected_checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Expected Checks",
+      "type": "array"
+    },
+    "expected_sees": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "items": {
+            "$ref": "#/$defs/SeesRecord"
+          },
+          "type": "array"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "dark",
+            "undefined"
+          ]
+        }
+      },
+      "title": "Expected Sees",
+      "type": "object"
+    },
+    "name": {
+      "title": "Name",
       "type": "string"
     },
-    "schema_version": {
-      "default": 1,
-      "title": "Schema Version",
-      "type": "integer"
-    },
-    "vectors": {
-      "items": {
-        "$ref": "#/$defs/ConformanceVector"
+    "state": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+          "$ref": "#/$defs/SelectorState"
+        }
       },
-      "title": "Vectors",
-      "type": "array"
+      "propertyNames": {
+        "not": {
+          "anyOf": [
+            {
+              "pattern": "^(dark|undefined)(\\.|$)"
+            },
+            {
+              "pattern": "\\.(dark|undefined)$"
+            }
+          ]
+        }
+      },
+      "title": "State",
+      "type": "object"
     }
   },
   "required": [
-    "generated_from",
-    "vectors"
+    "name",
+    "components",
+    "expected_sees"
   ],
-  "title": "ConformanceSuite",
+  "title": "ConformanceVector",
   "type": "object"
 }

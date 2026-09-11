@@ -10,7 +10,7 @@ Spec: knowledge-base ``Architecture/Optical Path Model.md``.
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import StringConstraints
+from pydantic import AfterValidator, StringConstraints, WithJsonSchema
 
 # --- reserved words ------------------------------------------------------------------------
 
@@ -27,14 +27,41 @@ RESERVED_WORDS: frozenset[str] = frozenset({DARK, UNDEFINED})
 
 _IDENT = r"[a-z][a-z0-9_]*"
 
+
+def _not_reserved(value: str) -> str:
+    """No part of a name (``x`` or ``x.y``) may be a reserved word. Part of the identifier *types*
+    below, so every model that names a component, a symbol or a state key rejects ``dark`` /
+    ``undefined`` — results and compiled artifacts included, not only the authored grammar."""
+    for part in value.split("."):
+        if part in RESERVED_WORDS:
+            raise ValueError(f"{value!r}: {part!r} is a reserved word")
+    return value
+
+
+#: The same rule in JSON Schema (pydantic's regex engine has no look-around, so the exclusion is a
+#: ``not`` clause rather than part of the pattern). A TypeScript validator rejects exactly what Python does.
+_NAME_SCHEMA = {"type": "string", "pattern": rf"^{_IDENT}$", "not": {"enum": sorted(RESERVED_WORDS)}}
+_STATE_KEY_SCHEMA = {
+    "type": "string",
+    "pattern": rf"^{_IDENT}(\.{_IDENT})?$",
+    "not": {"anyOf": [{"pattern": r"^(dark|undefined)(\.|$)"}, {"pattern": r"\.(dark|undefined)$"}]},
+}
+
+#: JSON Schema extras for maps keyed by the identifier types: pydantic emits ``patternProperties``
+#: from the key pattern but neither closes the object nor carries the reserved-word exclusion.
+#: Attach with ``Field(json_schema_extra=...)`` so a JSON Schema validator rejects exactly the keys
+#: Python rejects.
+CLOSED_NAME_KEYS = {"additionalProperties": False, "propertyNames": {"not": _NAME_SCHEMA["not"]}}
+CLOSED_STATE_KEYS = {"additionalProperties": False, "propertyNames": {"not": _STATE_KEY_SCHEMA["not"]}}
+
 #: A component name as it appears under ``components:`` in the observatory config
-#: (``tertiary``, ``guider_beso``). Lower-case identifiers only.
-ComponentName = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$")]
+#: (``tertiary``, ``guider_beso``). Lower-case identifiers only, never a reserved word.
+ComponentName = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$"), AfterValidator(_not_reserved), WithJsonSchema(_NAME_SCHEMA)]
 
 #: A selector position symbol declared under a device's ``positions:`` (``beso``, ``andor``,
 #: ``open``, ``thar``). Symbols are the *only* thing edges reference; hardware numbers stay
-#: inside the ``positions:`` mapping.
-Symbol = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$")]
+#: inside the ``positions:`` mapping. Never a reserved word.
+Symbol = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$"), AfterValidator(_not_reserved), WithJsonSchema(_NAME_SCHEMA)]
 
 #: A light class: ``<family>`` or ``<family>.<state>`` (``lamp``, ``flatscreen``,
 #: ``sky.science``). The dotted form is reserved for stateful sources; the reserved words
@@ -49,7 +76,7 @@ FunctionName = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$")]
 #: dotted state form. An Alpaca cover calibrator is one component with two independent axes:
 #: ``covercalibrator`` (the cover: open/close) and ``covercalibrator.calibrator`` (the lamp:
 #: on/off). Which aspects a kind has is device contract, never config.
-StateKey = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$")]
+StateKey = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$"), AfterValidator(_not_reserved), WithJsonSchema(_STATE_KEY_SCHEMA)]
 
 
 def state_key(component: str, aspect: str | None = None) -> str:

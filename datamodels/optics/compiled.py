@@ -1,12 +1,12 @@
 """The compiled artifact (W3): route table + conflict map, *generated from the graph and then
 verified against it* in the config repo's CI, committed lockfile-style next to the authored
 ``optics:`` sections and published verbatim by TIC. Simple clients look routes up here; rich
-clients still traverse the graph. The compilate never contains runtime state.
+clients still traverse the graph. The compiled artifact never contains runtime state.
 """
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import ComponentName, FunctionName, LightClass, StateKey, Symbol
+from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, LightClass, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 
@@ -20,7 +20,7 @@ class Route(BaseModel):
     function: FunctionName
     alternative: int = Field(ge=0)  #: index into the authored alternatives list (0 for a bare goal)
     see: LightClass
-    positions: dict[StateKey, Symbol]  #: every selector (and emitting aspect) on the path and the position it must hold for a *clean* view
+    positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)  #: every selector (and emitting aspect) on the path and the position it must hold for a *clean* view
     when: LightClass | None = None
 
 

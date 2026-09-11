@@ -1,0 +1,69 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Environment.schema.json",
+  "additionalProperties": true,
+  "description": "Inputs to derived selectors and stateful sources. Open — a new predicate adds a field.",
+  "properties": {
+    "dome_az_deg": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dome Az Deg"
+    },
+    "dome_shutter_open": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dome Shutter Open"
+    },
+    "mount_alt_deg": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mount Alt Deg"
+    },
+    "mount_az_deg": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mount Az Deg"
+    },
+    "sun_alt_deg": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sun Alt Deg"
+    }
+  },
+  "title": "Environment",
+  "type": "object"
+}

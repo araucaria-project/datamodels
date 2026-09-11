@@ -1,0 +1,15 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/CoreFunction.schema.json",
+  "description": "Detector functions with a reserved meaning — the obsplan verbs, lower-cased. An observing\nprogram resolves identically on every telescope because every telescope's ``paths:`` uses\nthese names for these purposes. Config may add extra functions freely.",
+  "enum": [
+    "object",
+    "snap",
+    "focus",
+    "skyflat",
+    "domeflat",
+    "dark",
+    "zero"
+  ],
+  "title": "CoreFunction",
+  "type": "string"
+}

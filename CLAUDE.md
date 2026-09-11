@@ -130,8 +130,16 @@ Conventions that **differ** from the observation models, deliberately:
   wrap device/vendor data stay `extra="allow"`: `PositionSpec` (vendor keys like `autoslew-name`),
   `OpticalComponentSpec` / `TelescopeOpticsSpec` (device fields ride along), `DisplayHint`, `Environment`.
 - **Namespaces are separate.** `dark` is a reserved *light class* and also the DARK *function name*; the
-  reserved-word check applies to component names, position symbols and port references — never to
-  function names.
+  reserved-word exclusion is part of the identifier *types* (`ComponentName`, `Symbol`, `StateKey`: an
+  `AfterValidator` plus a `not` clause in their JSON Schema) so results and compiled artifacts reject it
+  too — never `FunctionName` or `LightClass`.
+- **The exported schema is as strict as Python.** Grammar invariants that pydantic's generator cannot
+  derive from validators are stated explicitly (`json_schema_extra`: exactly-one-of `from`/`inputs`,
+  `additionalProperties: false` + `propertyNames` on constrained-key maps, `minItems`/`minProperties`
+  via `annotated_types.Len`). `tests/test_optics.py::TestSchemaSemantics` replays the same cases through
+  `jsonschema` and pydantic and asserts they agree — extend it whenever a validator is added.
+- **Every public contract is exported** (`EXPORTED` in `schema.py`): grammar parts, results, compiled
+  artifact parts, conformance parts and the vocabulary enums, one file each under `schemas/optics/`.
 - **Multi-aspect selectors use the dotted state form.** Proven state, `via`, route positions and moves are
   keyed by `StateKey`: a component name, or `component.aspect` for one axis of a device with several
   (`covercalibrator` = the cover, `covercalibrator.calibrator` = its lamp). Which aspects exist is kind

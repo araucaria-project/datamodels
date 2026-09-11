@@ -1,0 +1,45 @@
+{
+  "$defs": {
+    "PositionSpec": {
+      "additionalProperties": true,
+      "description": "Hardware mapping of one position symbol. The keys are vendor-specific and deliberately\nopen (``port``, ``autoslew-name``, ``slot`` …); the solver never reads them — only the\ndevice driver does, when resolving symbol -> hardware in ``optical_select(symbol)``.\n\nReference shape (jk15, shipped 2026-07-29; AutoSlew ports are 1-based)::\n\n    positions:\n      beso:  {port: 1, autoslew-name: 'ADR6'}\n      andor: {port: 2, autoslew-name: 'ADR10'}",
+      "properties": {
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        }
+      },
+      "title": "PositionSpec",
+      "type": "object"
+    }
+  },
+  "$id": "https://araucaria-project.github.io/datamodels/optics/PositionsSpec.schema.json",
+  "additionalProperties": false,
+  "description": "``positions:`` — the symbol vocabulary a selector declares. Edges downstream reference\nthese symbols and nothing else. Reserved words are excluded by :data:`Symbol` itself.",
+  "patternProperties": {
+    "^[a-z][a-z0-9_]*$": {
+      "$ref": "#/$defs/PositionSpec"
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "enum": [
+        "dark",
+        "undefined"
+      ]
+    }
+  },
+  "title": "PositionsSpec",
+  "type": "object"
+}

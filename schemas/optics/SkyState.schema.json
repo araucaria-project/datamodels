@@ -1,0 +1,12 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/SkyState.schema.json",
+  "description": "States of the stateful ``sky`` source, computed from sun altitude by the solver (config may\noverride thresholds). ``sky.science`` is what OBJECT needs; ``sky.flat`` is what SKYFLAT needs.",
+  "enum": [
+    "science",
+    "twilight",
+    "flat",
+    "day"
+  ],
+  "title": "SkyState",
+  "type": "string"
+}

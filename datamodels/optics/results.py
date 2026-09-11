@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import ComponentName, FunctionName, LightClass, StateKey, Symbol, VerdictKind
+from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, LightClass, StateKey, Symbol, VerdictKind
 
 
 class SeesRecord(BaseModel):
@@ -46,7 +46,7 @@ class Active(BaseModel):
 
     kind: Literal[VerdictKind.ACTIVE] = VerdictKind.ACTIVE
     see: LightClass
-    positions: dict[StateKey, Symbol] = Field(default_factory=dict)  #: proven selector positions on the path
+    positions: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)  #: proven selector positions on the path
 
 
 class Settable(BaseModel):
@@ -57,8 +57,8 @@ class Settable(BaseModel):
 
     kind: Literal[VerdictKind.SETTABLE] = VerdictKind.SETTABLE
     see: LightClass
-    positions: dict[StateKey, Symbol]
-    moves: dict[StateKey, Symbol]
+    positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)
+    moves: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)
 
 
 class Collision(BaseModel):

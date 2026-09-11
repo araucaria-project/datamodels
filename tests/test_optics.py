@@ -37,7 +37,8 @@ from datamodels.optics import (
     split_state_key,
     state_key,
 )
-from datamodels.optics.schema import DEFAULT_OUT_DIR, json_schemas, render
+from datamodels.optics.schema import DEFAULT_OUT_DIR, EXPORTED, json_schemas, render
+from jsonschema import Draft202012Validator
 
 EXAMPLE_PATH = Path(__file__).parent.parent / "examples" / "optics_jk15_example.json"
 SCHEMAS_DIR = Path(__file__).parent.parent / DEFAULT_OUT_DIR
@@ -117,11 +118,12 @@ class TestOpticsEdges:
             ({}, "exactly one of"),
             ({"from": "a", "inputs": {"x": "b"}}, "exactly one of"),
             ({"from": ["a", "b"]}, "reserved and not implemented"),
-            ({"from": {"a": "p", "b": "q"}}, "exactly one upstream"),
-            ({"from": {"a": []}}, "must not be empty"),
-            ({"inputs": {}}, "at least one input"),
+            ({"from": {"a": "p", "b": "q"}}, "at most 1 item"),
+            ({"from": {"a": []}}, "at least 1 item"),
+            ({"inputs": {}}, "at least 1 item"),
             ({"from": "dark"}, "reserved word"),
             ({"from": {"tertiary": "undefined"}}, "reserved word"),
+            ({"from": {"dark": "p"}}, "reserved word"),
             ({"from": "a", "colour": "red"}, "Extra inputs are not permitted"),
         ],
     )
@@ -161,7 +163,7 @@ class TestDetectorPaths:
         [
             ({"object": "undefined"}, "never be 'undefined'"),
             ({"object": {"see": "undefined"}}, "never be 'undefined'"),
-            ({"object": []}, "must not be empty"),
+            ({"object": []}, "at least 1 item"),
             ({"object": {"see": "sky.science", "through": {}}}, "Extra inputs are not permitted"),
         ],
     )
@@ -304,11 +306,92 @@ class TestJsonSchemaExport:
                 f"{committed[name]} is stale — run `uv run datamodels-export-schemas` and commit the result"
             )
 
+    def test_every_public_contract_is_exported(self):
+        names = set(EXPORTED)
+        for required in ("EdgeRef", "OpticsEdges", "PositionsSpec", "GoalSpec", "SelectorState", "Environment",
+                         "Route", "Conflict", "ConfigError", "Archetype", "CoreFunction", "VerdictKind", "PortOwner"):
+            assert required in names
+
     def test_wire_names_survive_in_schema(self):
         sees = json_schemas()["SeesRecord"]
         assert set(sees["properties"]) == {"class", "terminal", "via"}
         verdict = json_schemas()["Verdict"]
         assert set(verdict["discriminator"]["mapping"]) == {"active", "settable", "collision", "impossible", "invalid"}
+
+
+class TestSchemaSemantics:
+    """The exported schema must reject what Python rejects: a TypeScript validator gets the same
+    grammar, not a looser shadow of it."""
+
+    @staticmethod
+    def _validator(name: str) -> Draft202012Validator:
+        schema = json_schemas()[name]
+        Draft202012Validator.check_schema(schema)
+        return Draft202012Validator(schema)
+
+    @pytest.mark.parametrize(
+        "raw, valid",
+        [
+            ({"from": "dome"}, True),
+            ({"from": {"tertiary": "andor"}}, True),
+            ({"from": {"pickoff": ["main", "guide"]}}, True),
+            ({"inputs": {"open": "sky", "flat": "flatscreen"}}, True),
+            ({}, False),
+            ({"from": "a", "inputs": {"x": "b"}}, False),
+            ({"from": ["a", "b"]}, False),
+            ({"from": {"a": "p", "b": "q"}}, False),
+            ({"from": {"a": []}}, False),
+            ({"inputs": {}}, False),
+            ({"from": "dark"}, False),
+            ({"from": {"tertiary": "undefined"}}, False),
+            ({"from": {"dark": "p"}}, False),
+            ({"inputs": {"Open": "sky"}}, False),
+            ({"from": "a", "colour": "red"}, False),
+        ],
+    )
+    def test_optics_edges_schema_matches_python(self, raw, valid):
+        assert self._validator("OpticsEdges").is_valid(raw) is valid
+        try:
+            OpticsEdges.model_validate(raw)
+            python_valid = True
+        except ValidationError:
+            python_valid = False
+        assert python_valid is valid
+
+    @pytest.mark.parametrize(
+        "raw, valid",
+        [
+            ({"beso": {"port": 1, "autoslew-name": "ADR6"}}, True),
+            ({"dark": {"port": 3}}, False),
+            ({"ADR6": {"port": 1}}, False),
+        ],
+    )
+    def test_positions_schema_rejects_reserved_and_malformed_symbols(self, raw, valid):
+        assert self._validator("PositionsSpec").is_valid(raw) is valid
+
+    def test_results_reject_reserved_component_references(self):
+        sees = self._validator("SeesRecord")
+        assert sees.is_valid({"class": "dark", "terminal": "tertiary"})
+        assert not sees.is_valid({"class": "dark", "terminal": "dark"})
+        with pytest.raises(ValidationError, match="reserved word"):
+            SeesRecord.model_validate({"class": "dark", "terminal": "dark"})
+        check = self._validator("CheckResult")
+        assert not check.is_valid({"detector": "undefined", "function": "object", "verdict": {"kind": "active", "see": "sky.science"}})
+        with pytest.raises(ValidationError, match="reserved word"):
+            CheckResult.model_validate({"detector": "undefined", "function": "object", "verdict": {"kind": "active", "see": "sky.science"}})
+
+    def test_state_key_schema(self):
+        settable = self._validator("Verdict")
+        ok = {"kind": "settable", "see": "dark", "positions": {"covercalibrator.calibrator": "off"}, "moves": {}}
+        assert settable.is_valid(ok)
+        assert not settable.is_valid({**ok, "positions": {"dark.calibrator": "off"}})
+        assert not settable.is_valid({**ok, "positions": {"covercalibrator.undefined": "off"}})
+        assert not settable.is_valid({**ok, "positions": {"a.b.c": "off"}})
+
+    def test_example_validates_against_the_exported_schema(self, ):
+        raw = json.loads(EXAMPLE_PATH.read_text())
+        assert self._validator("TelescopeOpticsSpec").is_valid(raw)
+        assert not self._validator("TelescopeOpticsSpec").is_valid({**raw, "components": {**raw["components"], "dark": {"kind": "beamdump"}}})
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 {
   "$defs": {
     "DetectorPaths": {
+      "additionalProperties": false,
       "description": "``paths:`` on a detector — functions mapped to goals. Function names from\n:class:`~datamodels.optics.vocabulary.CoreFunction` carry a reserved meaning; others are\nfree.",
       "patternProperties": {
         "^[a-z][a-z0-9_]*$": {
@@ -24,6 +25,7 @@
                   }
                 ]
               },
+              "minItems": 1,
               "type": "array"
             }
           ]
@@ -86,10 +88,29 @@
           "type": "string"
         },
         "via": {
+          "additionalProperties": false,
           "patternProperties": {
             "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+              "not": {
+                "enum": [
+                  "dark",
+                  "undefined"
+                ]
+              },
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "anyOf": [
+                {
+                  "pattern": "^(dark|undefined)(\\.|$)"
+                },
+                {
+                  "pattern": "\\.(dark|undefined)$"
+                }
+              ]
             }
           },
           "title": "Via",
@@ -118,33 +139,84 @@
     "OpticsEdges": {
       "additionalProperties": false,
       "description": "The ``optics:`` block of one component. Exactly one of ``from`` / ``inputs``.\n\nUse :meth:`edges` to get the normalized :class:`EdgeRef` list — that is the only form the\nsolver and renderers consume; the YAML sugar stops here.",
+      "oneOf": [
+        {
+          "not": {
+            "required": [
+              "inputs"
+            ]
+          },
+          "required": [
+            "from"
+          ]
+        },
+        {
+          "not": {
+            "required": [
+              "from"
+            ]
+          },
+          "required": [
+            "inputs"
+          ]
+        }
+      ],
       "properties": {
         "from": {
           "anyOf": [
             {
+              "not": {
+                "enum": [
+                  "dark",
+                  "undefined"
+                ]
+              },
+              "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             },
             {
-              "additionalProperties": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "items": {
+              "additionalProperties": false,
+              "maxProperties": 1,
+              "minProperties": 1,
+              "patternProperties": {
+                "^[a-z][a-z0-9_]*$": {
+                  "anyOf": [
+                    {
+                      "not": {
+                        "enum": [
+                          "dark",
+                          "undefined"
+                        ]
+                      },
+                      "pattern": "^[a-z][a-z0-9_]*$",
                       "type": "string"
                     },
-                    "type": "array"
-                  }
-                ]
+                    {
+                      "items": {
+                        "not": {
+                          "enum": [
+                            "dark",
+                            "undefined"
+                          ]
+                        },
+                        "pattern": "^[a-z][a-z0-9_]*$",
+                        "type": "string"
+                      },
+                      "minItems": 1,
+                      "type": "array"
+                    }
+                  ]
+                }
+              },
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "dark",
+                    "undefined"
+                  ]
+                }
               },
               "type": "object"
-            },
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
             },
             {
               "type": "null"
@@ -156,10 +228,26 @@
         "inputs": {
           "anyOf": [
             {
+              "additionalProperties": false,
+              "minProperties": 1,
               "patternProperties": {
                 "^[a-z][a-z0-9_]*$": {
+                  "not": {
+                    "enum": [
+                      "dark",
+                      "undefined"
+                    ]
+                  },
                   "pattern": "^[a-z][a-z0-9_]*$",
                   "type": "string"
+                }
+              },
+              "propertyNames": {
+                "not": {
+                  "enum": [
+                    "dark",
+                    "undefined"
+                  ]
                 }
               },
               "type": "object"
@@ -199,10 +287,19 @@
       "type": "object"
     },
     "PositionsSpec": {
-      "description": "``positions:`` — the symbol vocabulary a selector declares. Edges downstream reference\nthese symbols and nothing else.",
+      "additionalProperties": false,
+      "description": "``positions:`` — the symbol vocabulary a selector declares. Edges downstream reference\nthese symbols and nothing else. Reserved words are excluded by :data:`Symbol` itself.",
       "patternProperties": {
         "^[a-z][a-z0-9_]*$": {
           "$ref": "#/$defs/PositionSpec"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "dark",
+            "undefined"
+          ]
         }
       },
       "title": "PositionsSpec",

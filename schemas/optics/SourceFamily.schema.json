@@ -1,0 +1,12 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/SourceFamily.schema.json",
+  "description": "Light-class families that ship with the model. Open vocabulary — a config may introduce a\nnew family and the solver treats it as an opaque source class; these are the ones the\nvocabulary, rendering colours and the sky predicate know about.",
+  "enum": [
+    "sky",
+    "lamp",
+    "flatscreen",
+    "beamdump"
+  ],
+  "title": "SourceFamily",
+  "type": "string"
+}

@@ -1,0 +1,13 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/VerdictKind.schema.json",
+  "description": "Outcome of ``check(detector, function)``.",
+  "enum": [
+    "active",
+    "settable",
+    "collision",
+    "impossible",
+    "invalid"
+  ],
+  "title": "VerdictKind",
+  "type": "string"
+}

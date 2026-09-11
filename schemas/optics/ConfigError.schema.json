@@ -1,0 +1,52 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/ConfigError.schema.json",
+  "additionalProperties": false,
+  "description": "One load-time problem with the authored graph.",
+  "properties": {
+    "code": {
+      "title": "Code",
+      "type": "string"
+    },
+    "component": {
+      "anyOf": [
+        {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Component"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Path"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "title": "ConfigError",
+  "type": "object"
+}

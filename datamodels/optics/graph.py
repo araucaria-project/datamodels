@@ -16,12 +16,14 @@ Grammar (v4):
       from: [X, Y]          # m->1 merger — RESERVED, rejected until implemented
 """
 
-from typing import Any
+from typing import Annotated, Any
 
+from annotated_types import Len
 from pydantic import BaseModel, ConfigDict, Field, RootModel, field_validator, model_validator
 
 from datamodels.optics.vocabulary import (
-    RESERVED_WORDS,
+    CLOSED_NAME_KEYS,
+    CLOSED_STATE_KEYS,
     UNDEFINED,
     ComponentName,
     FunctionName,
@@ -30,12 +32,6 @@ from datamodels.optics.vocabulary import (
     StateKey,
     Symbol,
 )
-
-
-def _reject_reserved(name: str, what: str) -> str:
-    if name in RESERVED_WORDS:
-        raise ValueError(f"{what} {name!r} is a reserved word")
-    return name
 
 
 # --- selector positions ----------------------------------------------------------------------
@@ -60,14 +56,9 @@ class PositionSpec(BaseModel):
 
 class PositionsSpec(RootModel[dict[Symbol, PositionSpec]]):
     """``positions:`` — the symbol vocabulary a selector declares. Edges downstream reference
-    these symbols and nothing else."""
+    these symbols and nothing else. Reserved words are excluded by :data:`Symbol` itself."""
 
-    @field_validator("root")
-    @classmethod
-    def _no_reserved_symbols(cls, value: dict[str, PositionSpec]) -> dict[str, PositionSpec]:
-        for symbol in value:
-            _reject_reserved(symbol, "position symbol")
-        return value
+    model_config = ConfigDict(json_schema_extra=CLOSED_NAME_KEYS)
 
     def __iter__(self):
         return iter(self.root)
@@ -99,7 +90,18 @@ class EdgeRef(BaseModel):
         return self
 
 
-FromSpec = str | dict[str, str | list[str]] | list[str]
+#: ``from: X`` | ``from: {X: port}`` | ``from: {X: [p1, p2]}``. The reserved list form is not part of
+#: the type: a ``before`` validator turns it into a clear error, and the schema simply does not admit it.
+Ports = Symbol | Annotated[list[Symbol], Len(min_length=1)]
+FromSpec = ComponentName | Annotated[dict[ComponentName, Ports], Len(min_length=1, max_length=1), Field(json_schema_extra=CLOSED_NAME_KEYS)]
+
+#: Exactly one of ``from`` / ``inputs`` — stated in the schema, not only in Python.
+_EXACTLY_ONE_FORM = {
+    "oneOf": [
+        {"required": ["from"], "not": {"required": ["inputs"]}},
+        {"required": ["inputs"], "not": {"required": ["from"]}},
+    ]
+}
 
 
 class OpticsEdges(BaseModel):
@@ -109,32 +111,25 @@ class OpticsEdges(BaseModel):
     solver and renderers consume; the YAML sugar stops here.
     """
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, json_schema_extra=_EXACTLY_ONE_FORM)
 
     from_: FromSpec | None = Field(default=None, alias="from")
-    inputs: dict[Symbol, ComponentName] | None = None
+    inputs: Annotated[dict[Symbol, ComponentName], Len(min_length=1), Field(json_schema_extra=CLOSED_NAME_KEYS)] | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _reserved_list_form(cls, data: Any) -> Any:
+        if isinstance(data, dict) and isinstance(data.get("from", data.get("from_")), list):
+            raise ValueError(
+                "optics.from: the list form `from: [X, Y]` (m->1 merger) is reserved and not "
+                "implemented; use a splitter/selector component instead"
+            )
+        return data
 
     @model_validator(mode="after")
     def _exactly_one_form(self) -> "OpticsEdges":
         if (self.from_ is None) == (self.inputs is None):
             raise ValueError("optics: exactly one of 'from' or 'inputs' is required")
-        if isinstance(self.from_, list):
-            raise ValueError(
-                "optics.from: the list form `from: [X, Y]` (m->1 merger) is reserved and not "
-                "implemented; use a splitter/selector component instead"
-            )
-        if isinstance(self.from_, dict):
-            if len(self.from_) != 1:
-                raise ValueError("optics.from: the mapping form names exactly one upstream component")
-            (ports,) = self.from_.values()
-            if isinstance(ports, list) and len(ports) == 0:
-                raise ValueError("optics.from: the port list must not be empty")
-        if self.inputs is not None and len(self.inputs) == 0:
-            raise ValueError("optics.inputs: a fan-in selector needs at least one input")
-        for ref in self.edges():
-            _reject_reserved(ref.component, "component reference")
-            if ref.port is not None:
-                _reject_reserved(ref.port, "port symbol")
         return self
 
     def edges(self) -> list[EdgeRef]:
@@ -168,7 +163,7 @@ class GoalSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     see: LightClass
-    via: dict[StateKey, Symbol] = Field(default_factory=dict)
+    via: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)
     when: LightClass | None = None
 
     @field_validator("see", "when")
@@ -184,13 +179,15 @@ GoalAlternative = LightClass | GoalSpec
 
 #: What a detector function wants to see: a class, an explicit goal, or an ordered list of
 #: alternatives (first satisfiable wins).
-GoalExpr = GoalAlternative | list[GoalAlternative]
+GoalExpr = GoalAlternative | Annotated[list[GoalAlternative], Len(min_length=1)]
 
 
 class DetectorPaths(RootModel[dict[FunctionName, GoalExpr]]):
     """``paths:`` on a detector — functions mapped to goals. Function names from
     :class:`~datamodels.optics.vocabulary.CoreFunction` carry a reserved meaning; others are
     free."""
+
+    model_config = ConfigDict(json_schema_extra={"additionalProperties": False})  # `dark` is a legal function name here
 
     @field_validator("root")
     @classmethod
@@ -257,15 +254,8 @@ class TelescopeOpticsSpec(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    components: dict[ComponentName, OpticalComponentSpec]
-    presets: dict[str, dict[ComponentName, FunctionName]] = Field(default_factory=dict)
-
-    @field_validator("components")
-    @classmethod
-    def _no_reserved_component_names(cls, value: dict[str, Any]) -> dict[str, Any]:
-        for name in value:
-            _reject_reserved(name, "component name")
-        return value
+    components: dict[ComponentName, OpticalComponentSpec] = Field(json_schema_extra=CLOSED_NAME_KEYS)
+    presets: dict[str, Annotated[dict[ComponentName, FunctionName], Field(json_schema_extra=CLOSED_NAME_KEYS)]] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _presets_reference_declared_paths(self) -> "TelescopeOpticsSpec":

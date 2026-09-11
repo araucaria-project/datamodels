@@ -1,0 +1,84 @@
+{
+  "$id": "https://araucaria-project.github.io/datamodels/optics/Route.schema.json",
+  "additionalProperties": false,
+  "description": "One alternative of one detector function, fully resolved to selector positions.",
+  "properties": {
+    "alternative": {
+      "minimum": 0,
+      "title": "Alternative",
+      "type": "integer"
+    },
+    "detector": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Detector",
+      "type": "string"
+    },
+    "function": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Function",
+      "type": "string"
+    },
+    "positions": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "anyOf": [
+            {
+              "pattern": "^(dark|undefined)(\\.|$)"
+            },
+            {
+              "pattern": "\\.(dark|undefined)$"
+            }
+          ]
+        }
+      },
+      "title": "Positions",
+      "type": "object"
+    },
+    "see": {
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+      "title": "See",
+      "type": "string"
+    },
+    "when": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "When"
+    }
+  },
+  "required": [
+    "detector",
+    "function",
+    "alternative",
+    "see",
+    "positions"
+  ],
+  "title": "Route",
+  "type": "object"
+}

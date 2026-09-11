@@ -9,6 +9,12 @@
       "type": "string"
     },
     "terminal": {
+      "not": {
+        "enum": [
+          "dark",
+          "undefined"
+        ]
+      },
       "pattern": "^[a-z][a-z0-9_]*$",
       "title": "Terminal",
       "type": "string"
@@ -16,6 +22,12 @@
     "via": {
       "default": [],
       "items": {
+        "not": {
+          "enum": [
+            "dark",
+            "undefined"
+          ]
+        },
         "pattern": "^[a-z][a-z0-9_]*$",
         "type": "string"
       },

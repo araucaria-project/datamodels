@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from datamodels.optics.graph import OpticalComponentSpec
 from datamodels.optics.results import CheckResult, SeesRecord
-from datamodels.optics.vocabulary import ComponentName, StateKey, Symbol
+from datamodels.optics.vocabulary import CLOSED_NAME_KEYS, CLOSED_STATE_KEYS, ComponentName, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 
@@ -43,10 +43,10 @@ class ConformanceVector(BaseModel):
 
     name: str
     description: str | None = None
-    components: dict[ComponentName, OpticalComponentSpec]
-    state: dict[StateKey, SelectorState] = Field(default_factory=dict)  #: keyed by selector, or ``selector.aspect``
+    components: dict[ComponentName, OpticalComponentSpec] = Field(json_schema_extra=CLOSED_NAME_KEYS)
+    state: dict[StateKey, SelectorState] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)  #: keyed by selector, or ``selector.aspect``
     environment: Environment = Field(default_factory=Environment)
-    expected_sees: dict[ComponentName, list[SeesRecord]]  #: per detector; order-insensitive (a set)
+    expected_sees: dict[ComponentName, list[SeesRecord]] = Field(json_schema_extra=CLOSED_NAME_KEYS)  #: per detector; order-insensitive (a set)
     expected_checks: list[CheckResult] = Field(default_factory=list)
 
 

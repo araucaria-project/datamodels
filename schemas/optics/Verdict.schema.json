@@ -11,10 +11,29 @@
           "type": "string"
         },
         "positions": {
+          "additionalProperties": false,
           "patternProperties": {
             "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+              "not": {
+                "enum": [
+                  "dark",
+                  "undefined"
+                ]
+              },
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "anyOf": [
+                {
+                  "pattern": "^(dark|undefined)(\\.|$)"
+                },
+                {
+                  "pattern": "\\.(dark|undefined)$"
+                }
+              ]
             }
           },
           "title": "Positions",
@@ -37,6 +56,12 @@
       "description": "A required selector is held in a contradictory position. ``holder`` names who holds it when\nthe access grantor knows; the reason is human-readable and stable enough to display.",
       "properties": {
         "held": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Held",
           "type": "string"
@@ -64,11 +89,27 @@
           "type": "string"
         },
         "required": {
+          "not": {
+            "enum": [
+              "dark",
+              "undefined"
+            ]
+          },
           "pattern": "^[a-z][a-z0-9_]*$",
           "title": "Required",
           "type": "string"
         },
         "selector": {
+          "not": {
+            "anyOf": [
+              {
+                "pattern": "^(dark|undefined)(\\.|$)"
+              },
+              {
+                "pattern": "\\.(dark|undefined)$"
+              }
+            ]
+          },
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "Selector",
           "type": "string"
@@ -94,6 +135,12 @@
         "component": {
           "anyOf": [
             {
+              "not": {
+                "enum": [
+                  "dark",
+                  "undefined"
+                ]
+              },
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             },
@@ -158,6 +205,16 @@
         "undefined_at": {
           "default": [],
           "items": {
+            "not": {
+              "anyOf": [
+                {
+                  "pattern": "^(dark|undefined)(\\.|$)"
+                },
+                {
+                  "pattern": "\\.(dark|undefined)$"
+                }
+              ]
+            },
             "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
             "type": "string"
           },
@@ -206,20 +263,58 @@
           "type": "string"
         },
         "moves": {
+          "additionalProperties": false,
           "patternProperties": {
             "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+              "not": {
+                "enum": [
+                  "dark",
+                  "undefined"
+                ]
+              },
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "anyOf": [
+                {
+                  "pattern": "^(dark|undefined)(\\.|$)"
+                },
+                {
+                  "pattern": "\\.(dark|undefined)$"
+                }
+              ]
             }
           },
           "title": "Moves",
           "type": "object"
         },
         "positions": {
+          "additionalProperties": false,
           "patternProperties": {
             "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
+              "not": {
+                "enum": [
+                  "dark",
+                  "undefined"
+                ]
+              },
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "anyOf": [
+                {
+                  "pattern": "^(dark|undefined)(\\.|$)"
+                },
+                {
+                  "pattern": "\\.(dark|undefined)$"
+                }
+              ]
             }
           },
           "title": "Positions",
