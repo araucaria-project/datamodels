@@ -27,6 +27,7 @@ from datamodels.optics.vocabulary import (
     FunctionName,
     LightClass,
     PortOwner,
+    StateKey,
     Symbol,
 )
 
@@ -167,7 +168,7 @@ class GoalSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     see: LightClass
-    via: dict[ComponentName, Symbol] = Field(default_factory=dict)
+    via: dict[StateKey, Symbol] = Field(default_factory=dict)
     when: LightClass | None = None
 
     @field_validator("see", "when")

@@ -12,7 +12,7 @@
         },
         "positions": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }
@@ -122,7 +122,7 @@
           "type": "string"
         },
         "selector": {
-          "pattern": "^[a-z][a-z0-9_]*$",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "Selector",
           "type": "string"
         }
@@ -233,7 +233,7 @@
         },
         "state": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "$ref": "#/$defs/SelectorState"
             }
           },
@@ -341,6 +341,18 @@
           "default": null,
           "title": "Dome Az Deg"
         },
+        "dome_shutter_open": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dome Shutter Open"
+        },
         "mount_alt_deg": {
           "anyOf": [
             {
@@ -392,7 +404,7 @@
         },
         "via": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }
@@ -450,7 +462,7 @@
         "undefined_at": {
           "default": [],
           "items": {
-            "pattern": "^[a-z][a-z0-9_]*$",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
             "type": "string"
           },
           "title": "Undefined At",
@@ -731,7 +743,7 @@
         },
         "moves": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }
@@ -741,7 +753,7 @@
         },
         "positions": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }

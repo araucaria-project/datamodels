@@ -108,7 +108,7 @@ don't uncomment/implement them without checking with the user first.
 
 ```
 vocabulary.py   reserved words (dark, undefined), identifier shapes (ComponentName, Symbol, LightClass,
-                FunctionName), closed enums (Archetype, SourceFamily, SkyState, CoreFunction = obsplan
+                FunctionName, StateKey = selector or `selector.aspect`), closed enums (Archetype, SourceFamily, SkyState, CoreFunction = obsplan
                 verbs lower-cased, VerdictKind, PortOwner)
 graph.py        the AUTHORED side: PositionsSpec (symbol -> vendor mapping), OpticsEdges (the edge grammar
                 `from` / `from: {X: port}` / `from: {X: [..]}` / `inputs: {pos: X}`, normalized by
@@ -132,6 +132,10 @@ Conventions that **differ** from the observation models, deliberately:
 - **Namespaces are separate.** `dark` is a reserved *light class* and also the DARK *function name*; the
   reserved-word check applies to component names, position symbols and port references — never to
   function names.
+- **Multi-aspect selectors use the dotted state form.** Proven state, `via`, route positions and moves are
+  keyed by `StateKey`: a component name, or `component.aspect` for one axis of a device with several
+  (`covercalibrator` = the cover, `covercalibrator.calibrator` = its lamp). Which aspects exist is kind
+  contract (solver), never config. `SeesRecord.terminal` stays a plain `ComponentName`.
 - **Shape validation only.** Whether a referenced port exists, whether a `paths` goal is satisfiable, whether
   two `from` edges collide on one port — that is the solver's `parse_graph` (ocabox-common) and comes back
   as an `Invalid` verdict with `ConfigError`s. Don't pull cross-component checks into these models.

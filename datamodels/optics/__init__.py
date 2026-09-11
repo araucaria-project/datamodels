@@ -42,17 +42,21 @@ from datamodels.optics.vocabulary import (
     PortOwner,
     SkyState,
     SourceFamily,
+    StateKey,
     Symbol,
     VerdictKind,
     light_family,
     light_state,
+    split_state_key,
+    state_key,
 )
 
 __all__ = [
     # vocabulary
     "DARK", "UNDEFINED", "RESERVED_WORDS",
     "Archetype", "SourceFamily", "SkyState", "CoreFunction", "VerdictKind", "PortOwner",
-    "ComponentName", "Symbol", "LightClass", "FunctionName", "light_family", "light_state",
+    "ComponentName", "Symbol", "LightClass", "FunctionName", "StateKey",
+    "light_family", "light_state", "state_key", "split_state_key",
     # authored grammar
     "PositionSpec", "PositionsSpec", "EdgeRef", "OpticsEdges", "GoalSpec", "GoalAlternative", "GoalExpr",
     "DetectorPaths", "DisplayHint", "OpticalComponentSpec", "TelescopeOpticsSpec",

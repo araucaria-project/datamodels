@@ -44,6 +44,24 @@ LightClass = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$
 #: A detector function name — the key of a ``paths:`` entry (``object``, ``dark``, ``domeflat``).
 FunctionName = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$")]
 
+#: What a selector position is keyed by in proven state, ``via`` and route tables: a component
+#: name, or ``<component>.<aspect>`` for one axis of a multi-aspect selector — the reserved
+#: dotted state form. An Alpaca cover calibrator is one component with two independent axes:
+#: ``covercalibrator`` (the cover: open/close) and ``covercalibrator.calibrator`` (the lamp:
+#: on/off). Which aspects a kind has is device contract, never config.
+StateKey = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$")]
+
+
+def state_key(component: str, aspect: str | None = None) -> str:
+    """``("covercalibrator", "calibrator")`` -> ``covercalibrator.calibrator``; no aspect -> the name."""
+    return f"{component}.{aspect}" if aspect else component
+
+
+def split_state_key(key: str) -> tuple[str, str | None]:
+    """``covercalibrator.calibrator`` -> ``("covercalibrator", "calibrator")``; ``tertiary`` -> ``("tertiary", None)``."""
+    component, _, aspect = key.partition(".")
+    return component, (aspect or None)
+
 
 def light_family(light_class: str) -> str:
     """``sky.science`` -> ``sky``; ``lamp`` -> ``lamp``."""

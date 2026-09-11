@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from datamodels.optics.graph import OpticalComponentSpec
 from datamodels.optics.results import CheckResult, SeesRecord
-from datamodels.optics.vocabulary import ComponentName, Symbol
+from datamodels.optics.vocabulary import ComponentName, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 
@@ -32,6 +32,7 @@ class Environment(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     sun_alt_deg: float | None = None
+    dome_shutter_open: bool | None = None
     dome_az_deg: float | None = None
     mount_az_deg: float | None = None
     mount_alt_deg: float | None = None
@@ -43,7 +44,7 @@ class ConformanceVector(BaseModel):
     name: str
     description: str | None = None
     components: dict[ComponentName, OpticalComponentSpec]
-    state: dict[ComponentName, SelectorState] = Field(default_factory=dict)
+    state: dict[StateKey, SelectorState] = Field(default_factory=dict)  #: keyed by selector, or ``selector.aspect``
     environment: Environment = Field(default_factory=Environment)
     expected_sees: dict[ComponentName, list[SeesRecord]]  #: per detector; order-insensitive (a set)
     expected_checks: list[CheckResult] = Field(default_factory=list)

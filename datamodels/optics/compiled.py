@@ -6,7 +6,7 @@ clients still traverse the graph. The compilate never contains runtime state.
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import ComponentName, FunctionName, LightClass, Symbol
+from datamodels.optics.vocabulary import ComponentName, FunctionName, LightClass, StateKey, Symbol
 
 SCHEMA_VERSION = 1
 
@@ -20,7 +20,7 @@ class Route(BaseModel):
     function: FunctionName
     alternative: int = Field(ge=0)  #: index into the authored alternatives list (0 for a bare goal)
     see: LightClass
-    positions: dict[ComponentName, Symbol]  #: every selector on the path and the position it must hold
+    positions: dict[StateKey, Symbol]  #: every selector (and emitting aspect) on the path and the position it must hold for a *clean* view
     when: LightClass | None = None
 
 
@@ -38,7 +38,7 @@ class Conflict(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    selector: ComponentName
+    selector: StateKey
     a: RouteKey
     b: RouteKey
     a_requires: Symbol

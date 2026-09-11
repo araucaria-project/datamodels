@@ -25,7 +25,7 @@
           "type": "string"
         },
         "selector": {
-          "pattern": "^[a-z][a-z0-9_]*$",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "Selector",
           "type": "string"
         }
@@ -62,7 +62,7 @@
         },
         "positions": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }

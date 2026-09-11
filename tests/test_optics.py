@@ -34,6 +34,8 @@ from datamodels.optics import (
     Verdict,
     light_family,
     light_state,
+    split_state_key,
+    state_key,
 )
 from datamodels.optics.schema import DEFAULT_OUT_DIR, json_schemas, render
 
@@ -50,6 +52,20 @@ class TestVocabulary:
         assert light_state("sky.science") == "science"
         assert light_family("lamp") == "lamp"
         assert light_state("lamp") is None
+
+    def test_state_key_names_a_selector_or_one_aspect_of_it(self):
+        assert state_key("covercalibrator", "calibrator") == "covercalibrator.calibrator"
+        assert state_key("tertiary") == "tertiary"
+        assert split_state_key("covercalibrator.calibrator") == ("covercalibrator", "calibrator")
+        assert split_state_key("tertiary") == ("tertiary", None)
+        adapter = TypeAdapter(Settable)
+        settable = adapter.validate_python(
+            {"kind": "settable", "see": "sky.science", "positions": {"covercalibrator": "open", "covercalibrator.calibrator": "off"},
+             "moves": {"covercalibrator.calibrator": "off"}}
+        )
+        assert settable.moves == {"covercalibrator.calibrator": "off"}
+        with pytest.raises(ValidationError):
+            adapter.validate_python({"kind": "settable", "see": "dark", "positions": {"a.b.c": "x"}, "moves": {}})
 
     def test_reserved_words_share_the_light_class_shape(self):
         adapter = TypeAdapter(SeesRecord)
@@ -264,8 +280,12 @@ class TestConformance:
             name="jk15 M3 readback 2 is unmapped",
             description="oca-problems#107: the operator most needs an answer exactly here",
             components=raw["components"],
-            state={"tertiary": SelectorState(position=None, raw=2), "covercalibrator": SelectorState(position="open")},
-            environment={"sun_alt_deg": -30.0},
+            state={
+                "tertiary": SelectorState(position=None, raw=2),
+                "covercalibrator": SelectorState(position="open"),
+                "covercalibrator.calibrator": SelectorState(position="off"),
+            },
+            environment={"sun_alt_deg": -30.0, "dome_shutter_open": True},
             expected_sees={"camera": [SeesRecord(light_class="undefined", terminal="tertiary", via=("derotator", "pickoff", "filterwheel"))]},
         )
         suite = ConformanceSuite(generated_from="ocabox-common 1.5.0", vectors=[vector])

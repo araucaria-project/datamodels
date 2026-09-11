@@ -12,7 +12,7 @@
         },
         "positions": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }
@@ -69,7 +69,7 @@
           "type": "string"
         },
         "selector": {
-          "pattern": "^[a-z][a-z0-9_]*$",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
           "title": "Selector",
           "type": "string"
         }
@@ -158,7 +158,7 @@
         "undefined_at": {
           "default": [],
           "items": {
-            "pattern": "^[a-z][a-z0-9_]*$",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
             "type": "string"
           },
           "title": "Undefined At",
@@ -207,7 +207,7 @@
         },
         "moves": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }
@@ -217,7 +217,7 @@
         },
         "positions": {
           "patternProperties": {
-            "^[a-z][a-z0-9_]*$": {
+            "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$": {
               "pattern": "^[a-z][a-z0-9_]*$",
               "type": "string"
             }

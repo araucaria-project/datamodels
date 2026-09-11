@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from datamodels.optics.vocabulary import ComponentName, FunctionName, LightClass, Symbol, VerdictKind
+from datamodels.optics.vocabulary import ComponentName, FunctionName, LightClass, StateKey, Symbol, VerdictKind
 
 
 class SeesRecord(BaseModel):
@@ -46,7 +46,7 @@ class Active(BaseModel):
 
     kind: Literal[VerdictKind.ACTIVE] = VerdictKind.ACTIVE
     see: LightClass
-    positions: dict[ComponentName, Symbol] = Field(default_factory=dict)  #: proven selector positions on the path
+    positions: dict[StateKey, Symbol] = Field(default_factory=dict)  #: proven selector positions on the path
 
 
 class Settable(BaseModel):
@@ -57,8 +57,8 @@ class Settable(BaseModel):
 
     kind: Literal[VerdictKind.SETTABLE] = VerdictKind.SETTABLE
     see: LightClass
-    positions: dict[ComponentName, Symbol]
-    moves: dict[ComponentName, Symbol]
+    positions: dict[StateKey, Symbol]
+    moves: dict[StateKey, Symbol]
 
 
 class Collision(BaseModel):
@@ -68,7 +68,7 @@ class Collision(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal[VerdictKind.COLLISION] = VerdictKind.COLLISION
-    selector: ComponentName
+    selector: StateKey
     required: Symbol
     held: Symbol
     holder: str | None = None
@@ -84,7 +84,7 @@ class Impossible(BaseModel):
     kind: Literal[VerdictKind.IMPOSSIBLE] = VerdictKind.IMPOSSIBLE
     reason: str
     unavailable: LightClass | None = None
-    undefined_at: tuple[ComponentName, ...] = ()
+    undefined_at: tuple[StateKey, ...] = ()
 
 
 class Invalid(BaseModel):
