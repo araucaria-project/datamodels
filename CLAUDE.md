@@ -42,8 +42,8 @@ Packaging uses `hatchling` (PEP 621 metadata in `pyproject.toml`); there is no `
 section despite the tracked `poetry.lock`, so treat `uv` as the source of truth for the
 environment. `uv.lock` is gitignored (local-only).
 
-`requires-python = ">=3.11"` and the only runtime dependency is `pydantic>=2.0` — keep it that
-way; this package is imported by several TACOSS services and must stay dependency-light. Python
+`requires-python = ">=3.11,<4.0"` (the family-wide `^3.11`, see the knowledge-base note *Python version
+policy across the family*) and the only runtime dependency is `pydantic>=2.0` — keep it that way; this package is imported by several TACOSS services and must stay dependency-light. Python
 3.11 means built-in generics and `X | None` unions are fine without `from __future__ import
 annotations`.
 

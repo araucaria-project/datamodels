@@ -23,6 +23,8 @@ JsonNumber = Annotated[float, Strict()]
 JsonInteger = Annotated[int, Strict()]
 #: A 0-based ordinal.
 Index = Annotated[JsonInteger, Ge(0)]
+#: A JSON Boolean; never 0/1 or "false".
+JsonBool = Annotated[bool, Strict()]
 
 # --- reserved words ------------------------------------------------------------------------
 
