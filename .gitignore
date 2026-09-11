@@ -8,3 +8,4 @@ build/
 venv/
 uv.lock
 .idea/
+schemas/            # JSON Schema export is a build artifact (release asset), never committed
