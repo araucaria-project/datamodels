@@ -31,7 +31,12 @@ class ObservationBase(BaseModel):
 
     # files support
     filetypes: Set[FileClassification] = Field(default_factory=set)
-    source_files: Set[str] = Field(default_factory=set)
+
+    # Approximate count of distinct source files referenced by this observation's linked
+    # FITSFiles. Kept as a cheap denormalized number (not the filenames themselves) so a
+    # consumer can size loading placeholders before the real source-file list is fetched;
+    # the count is expected to be corrected once that real fetch completes.
+    source_files_number: int = Field(0, description="Approximate count of distinct source files")
 
     # Raw FITS header (flat structure, exact field names)
     fits_header: FitsHeader = Field(..., description="Complete FITS header")
