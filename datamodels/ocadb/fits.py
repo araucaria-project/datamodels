@@ -8,7 +8,7 @@ than extending this module with storage-specific behavior.
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, BeforeValidator, Field
 
@@ -190,8 +190,19 @@ class StorageStatus(BaseModel):
     cloud: StorageLocationStatus = Field(..., description="Cloud storage status")
 
     @classmethod
-    def on_arrival(cls) -> "StorageStatus":
-        """Initial status for a file that just arrived at the observatory."""
+    def on_arrival(cls, location: Literal["observatory", "hub"]) -> "StorageStatus":
+        """Initial status for a file that just arrived at the given SROCA instance's location.
+
+        Files always originate at the observatory; the hub only ever receives copies,
+        so a hub arrival implies the observatory already has it too. An observatory
+        arrival says nothing about the hub, which is a separate, independent instance.
+        """
+        if location == "observatory":
+            return cls(
+                observatory=StorageLocationStatus.stored(),
+                hub=StorageLocationStatus.not_stored(),
+                cloud=StorageLocationStatus.not_stored(),
+            )
         return cls(
             observatory=StorageLocationStatus.stored(),
             hub=StorageLocationStatus.stored(),

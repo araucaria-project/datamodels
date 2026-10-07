@@ -102,8 +102,14 @@ class TestFileClassification:
 
 
 class TestStorageStatus:
-    def test_on_arrival(self):
-        status = StorageStatus.on_arrival()
+    def test_on_arrival_observatory(self):
+        status = StorageStatus.on_arrival("observatory")
+        assert status.observatory.status == StorageStatusType.STORED
+        assert status.hub.status == StorageStatusType.NOT_STORED
+        assert status.cloud.status == StorageStatusType.NOT_STORED
+
+    def test_on_arrival_hub(self):
+        status = StorageStatus.on_arrival("hub")
         assert status.observatory.status == StorageStatusType.STORED
         assert status.hub.status == StorageStatusType.STORED
         assert status.cloud.status == StorageStatusType.NOT_STORED
@@ -119,7 +125,7 @@ class TestFITSFile:
             filename="zb08c_0901_63900.fits",
             obs_name="zb08c_0901_63900",
             file_class=FileClassification.RAW,
-            file_status=StorageStatus.on_arrival(),
+            file_status=StorageStatus.on_arrival("hub"),
         )
         defaults.update(overrides)
         return FITSFile(**defaults)
