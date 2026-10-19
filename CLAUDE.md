@@ -16,6 +16,10 @@ currently three independent model modules plus one shared one:
 - `datamodels/observation/observation.py` — a single observation's data (files, measurements, quality checks).
 - `datamodels/projects_overview/projects_overview.py` — a processing run's overview of projects/objects and their
   statuses.
+- `datamodels/messages/` — NATS messages under the subject grammar of araucaria-project/oca_nats_config#2:
+  `Subject` (five tokens, `[a-z0-9_]+`, `svc` excluded — it belongs to ocabox-tcs) and the `data` model per
+  class (`StatusValue`, `RpcRequest`, `RpcReply`). `data.ts` is thing time (serverish `Timestamp` array),
+  `meta.ts` message time. First consumer: the TIC NATS service driver (ocabox-server).
 - `datamodels/optics/` — the **Optical Path Model v4** vocabularies and schemas (spec: knowledge-base
   `Architecture/Optical Path Model.md`; epic araucaria-project/ocabox-server#27; this module:
   araucaria-project/datamodels#10). Names and shapes only — the solver lives in ocabox-common.
