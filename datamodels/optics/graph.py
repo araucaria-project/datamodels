@@ -30,6 +30,7 @@ from datamodels.optics.vocabulary import (
     GoalClass,
     LightClass,
     PortOwner,
+    SourceLightClass,
     StateKey,
     Symbol,
 )
@@ -238,6 +239,7 @@ class OpticalComponentSpec(BaseModel):
     positions: PositionsSpec | None = None
     optics: OpticsEdges | None = None
     paths: DetectorPaths | None = None
+    light: SourceLightClass | None = None  #: sources only: the state of the kind's family this one emits (``lamp.thar``)
     display: DisplayHint | None = None
 
 

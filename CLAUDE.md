@@ -113,7 +113,8 @@ don't uncomment/implement them without checking with the user first.
 
 ```
 vocabulary.py   reserved words (dark, undefined), identifier shapes (ComponentName, Symbol, LightClass,
-                FunctionName, StateKey = selector or `selector.aspect`), closed enums (Archetype, SourceFamily, SkyState, CoreFunction = obsplan
+                SourceLightClass = what a source declares in `light:`, FunctionName, StateKey = selector or
+                `selector.aspect`), light_satisfies (the one family-matching rule), closed enums (Archetype, SourceFamily, SkyState, CoreFunction = obsplan
                 verbs lower-cased, VerdictKind, PortOwner)
 graph.py        the AUTHORED side: PositionsSpec (symbol -> vendor mapping), OpticsEdges (the edge grammar
                 `from` / `from: {X: port}` / `from: {X: [..]}` / `inputs: {pos: X}`, normalized by

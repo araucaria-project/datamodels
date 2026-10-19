@@ -21,6 +21,7 @@ from datamodels.optics import (
     GoalSpec,
     Invalid,
     light_family,
+    light_satisfies,
     light_state,
     OpticalComponentSpec,
     OpticsCompiled,
@@ -51,6 +52,10 @@ class TestVocabulary:
         assert {f.value for f in CoreFunction} == {"object", "snap", "focus", "flat", "skyflat", "domeflat", "arc", "dark", "zero"}
 
     def test_light_class_helpers(self):
+        assert light_satisfies("lamp", "lamp.thar") and light_satisfies("lamp", "lamp")
+        assert light_satisfies("lamp.thar", "lamp.thar") and not light_satisfies("lamp.thar", "lamp")
+        assert not light_satisfies("lamp", "lamplight") and not light_satisfies("sky.science", "sky.flat")
+        assert light_satisfies("dark", "dark") and not light_satisfies("dark", "dark.x")
         assert light_family("sky.science") == "sky"
         assert light_state("sky.science") == "science"
         assert light_family("lamp") == "lamp"
@@ -446,6 +451,25 @@ class TestSchemaSemantics:
         assert self._validator("EdgeRef").is_valid(raw) is valid
         try:
             EdgeRef.model_validate(raw)
+            python_valid = True
+        except ValidationError:
+            python_valid = False
+        assert python_valid is valid
+
+    @pytest.mark.parametrize(
+        "raw, valid",
+        [
+            ({"kind": "lamp", "light": "lamp.thar"}, True),
+            ({"kind": "lamp", "light": "lamp"}, True),
+            ({"kind": "lamp", "light": "dark"}, False),
+            ({"kind": "lamp", "light": "lamp.undefined"}, False),
+            ({"kind": "lamp", "light": "Lamp.ThAr"}, False),
+        ],
+    )
+    def test_source_light_class_in_schema_and_python(self, raw, valid):
+        assert self._validator("OpticalComponentSpec").is_valid(raw) is valid
+        try:
+            OpticalComponentSpec.model_validate(raw)
             python_valid = True
         except ValidationError:
             python_valid = False
