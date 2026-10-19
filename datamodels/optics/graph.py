@@ -215,11 +215,20 @@ class DetectorPaths(RootModel[dict[FunctionName, GoalExpr]]):
 
 
 class DisplayHint(BaseModel):
-    """Presentational hints, ignored by the solver. ``color`` overrides the source-class colour of
-    a source component; ``x``/``y`` position a node for non-linear graphs (BESO branch)."""
+    """Presentational hints, never optical truth. ``label`` is what people call the component
+    ("mirror covers", "ThAr lamp") and ``aspects`` names its aspects (``{calibrator: "flat lamp"}``)
+    — both override the kind's defaults in every human-facing text; ``glyph`` names the symbol it
+    wears instead of its kind's (a guider camera: ``guider``); ``color`` overrides the
+    source-class colour of a source component; ``x``/``y`` place it on the schematic grid, in
+    cells — ``x`` the column along the light (sources left, detectors right), ``y`` the row
+    (branches below the main line); components without them are laid out automatically
+    (``obcom.optics.schematic``)."""
 
     model_config = ConfigDict(extra="allow")
 
+    label: str | None = None
+    aspects: dict[str, str] | None = None
+    glyph: str | None = None
     color: str | None = None
     x: JsonNumber | None = None
     y: JsonNumber | None = None
