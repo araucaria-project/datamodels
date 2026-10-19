@@ -5,6 +5,9 @@ Data Models used on ocabox TACOSS software (OCM)
 
 - `datamodels.observation` — a single observation's data (files, measurements, quality checks)
 - `datamodels.projects_overview` — a processing run's overview of projects/objects and their statuses
+- `datamodels.messages` — NATS messages under the subject grammar `<class>.<realm>.<scope>.<element>.<item>`
+  (araucaria-project/oca_nats_config#2): `Subject` (parse / format) and the `data` model per class —
+  `StatusValue`, `RpcRequest`, `RpcReply` so far; more classes are added as writers migrate.
 - `datamodels.optics` — Optical Path Model v4 vocabularies and schemas (authored grammar, `sees()` records,
   verdicts, compiled route table, conformance vectors). The pydantic models are the only source of truth;
   the JSON Schemas TypeScript clients generate their types from are a **build artifact**: not committed,
