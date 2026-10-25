@@ -170,14 +170,24 @@ class OpticsEdges(BaseModel):
 
 class GoalSpec(BaseModel):
     """The explicit goal form: *see this class, through these selector positions, when this
-    condition holds*. ``via`` pins the dark terminal (``dark_strict`` = railway flank
-    protection); ``when`` conditions the alternative on the sky state."""
+    condition holds, with these positions held too*. ``via`` pins components the light passes
+    (``dark_strict`` = railway flank protection); ``when`` conditions the alternative on the sky
+    state; ``also`` holds positions of components that are *not* on the path — the covers closed
+    while M3 already turns the camera away (stray light finds its way around a mirror)."""
 
     model_config = ConfigDict(extra="forbid")
 
     see: GoalClass
     via: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)
     when: GoalClass | None = None
+    also: dict[StateKey, Symbol] | None = Field(default=None, json_schema_extra=CLOSED_STATE_KEYS)  #: absent, like ``when``, when nothing more is held
+
+    @model_validator(mode="after")
+    def _also_is_not_via(self) -> "GoalSpec":
+        both = sorted(set(self.via) & set(self.also or {}))
+        if both:
+            raise ValueError(f"{', '.join(both)}: in both via and also — via already holds what the light passes")
+        return self
 
 
 #: One alternative of a goal: a bare light class (never ``undefined``) or an explicit :class:`GoalSpec`.
