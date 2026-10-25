@@ -35,6 +35,7 @@ class Environment(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     sun_alt_deg: JsonNumber | None = None
+    sun_rising: JsonBool | None = None  #: the sun climbs (morning): which way the sky's light classes go next
     dome_shutter_open: JsonBool | None = None
     dome_az_deg: JsonNumber | None = None
     mount_az_deg: JsonNumber | None = None

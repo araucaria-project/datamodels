@@ -19,6 +19,7 @@ from datamodels.optics import (
     EdgeRef,
     Environment,
     GoalSpec,
+    Impossible,
     Invalid,
     light_family,
     light_satisfies,
@@ -611,6 +612,39 @@ class TestSchemaSemantics:
         raw = json.loads(EXAMPLE_PATH.read_text())
         assert self._validator("TelescopeOpticsSpec").is_valid(raw)
         assert not self._validator("TelescopeOpticsSpec").is_valid({**raw, "components": {**raw["components"], "dark": {"kind": "beamdump"}}})
+
+
+class TestHeldAndAwaited:
+    """``also`` (positions held off the path), ``Settable.confirm`` (moves that wait for a person) and
+    ``Impossible.awaits``/``prepare`` (light that will come by itself)."""
+
+    def test_also_holds_what_the_light_does_not_pass(self):
+        spec = DetectorPaths.model_validate({"dark_strict": {"see": "dark", "via": {"tertiary": "beso"}, "also": {"covercalibrator": "close"}}})
+        alt = spec.alternatives("dark_strict")[0]
+        assert alt.via == {"tertiary": "beso"} and alt.also == {"covercalibrator": "close"}
+        assert DetectorPaths.model_validate({"dark": "dark"}).alternatives("dark")[0].also is None  # absent stays absent
+
+    def test_also_never_repeats_via(self):
+        with pytest.raises(ValidationError, match="in both via and also"):
+            GoalSpec.model_validate({"see": "dark", "via": {"tertiary": "beso"}, "also": {"tertiary": "beso"}})
+
+    def test_confirm_names_moves(self):
+        settable = TypeAdapter(Settable)
+        base = {"kind": "settable", "see": "flatscreen", "positions": {"dome": "flat", "covercalibrator": "open"},
+                "moves": {"dome": "flat", "covercalibrator": "open"}}
+        assert settable.validate_python(base).confirm == ()
+        assert settable.validate_python({**base, "confirm": ["dome"]}).confirm == ("dome",)
+        with pytest.raises(ValidationError, match="not moves"):
+            settable.validate_python({**base, "confirm": ["tertiary"]})
+
+    def test_prepare_only_for_awaited_light(self):
+        impossible = TypeAdapter(Impossible)
+        waiting = impossible.validate_python({"kind": "impossible", "reason": "the sky is not dark yet", "unavailable": "sky.science",
+                                              "awaits": "sky.science", "prepare": {"covercalibrator": "open"}})
+        assert waiting.awaits == "sky.science" and waiting.prepare == {"covercalibrator": "open"}
+        assert impossible.validate_python({"kind": "impossible", "reason": "r", "awaits": "sky.science"}).prepare == {}  # ready already
+        with pytest.raises(ValidationError, match="prepare without awaits"):
+            impossible.validate_python({"kind": "impossible", "reason": "r", "prepare": {"covercalibrator": "open"}})
 
 
 if __name__ == "__main__":
