@@ -47,6 +47,139 @@
           "lc": {}
         }
       }
+    },
+    "binaries": {
+      "display_name": "Project:binaries",
+      "pi": null,
+      "sciprog": "binaries",
+      "name": "binaries",
+      "status": "ongoing",
+      "objects": {
+        "cs_eri": {
+          "display_name": "cs_eri",
+          "status": "ongoing",
+          "name": "cs_eri",
+          "lc": {
+            "r": {
+              "name": "r",
+              "display_name": "r",
+              "status": "ongoing",
+              "file_name": "cs_eri_zb08c_r_ap-diff.lc.png",
+              "info": {
+                "telescope": "zb08",
+                "object": "cs_eri",
+                "filter": "r",
+                "prefix": "ap-diff",
+                "lc_type": "diff",
+                "method": "ap",
+                "mag_type": "std",
+                "period": 0.311331,
+                "hjd0": 2460000.0,
+                "re_rendered": "2026-11-04T14:12:05Z"
+              },
+              "measurements": [
+                {
+                  "category": "snr",
+                  "result": {
+                    "median": 412,
+                    "min": 95,
+                    "max": 780
+                  }
+                },
+                {
+                  "category": "std",
+                  "result": {
+                    "pts": 180,
+                    "median": 0.12,
+                    "std": 0.03
+                  }
+                },
+                {
+                  "category": "points",
+                  "result": {
+                    "displayed": 199,
+                    "missing": 6,
+                    "last": "2026-11-03 04:12:55"
+                  }
+                },
+                {
+                  "category": "compare_stars",
+                  "result": {
+                    "quantity": 12,
+                    "std": 0.008
+                  }
+                }
+              ],
+              "models": [
+                {
+                  "category": "GaussianProcessLightCurve",
+                  "result": {
+                    "fitted": "2026-11-03T15:37:37.568045+00:00",
+                    "n_points": 199,
+                    "n_fit_points": 196,
+                    "n_outliers": 3,
+                    "local_scatter": 0.06336,
+                    "residuals_std": 0.04,
+                    "reliable": true,
+                    "untrusted_fraction": 0.0,
+                    "stats": {
+                      "max": 8.63346,
+                      "mean": 8.86351,
+                      "min": 9.09356,
+                      "amplitude": 0.4601
+                    },
+                    "curve_tolerance": 0.001,
+                    "curve": [
+                      [0.0, 8.7099],
+                      [0.027, 8.68307],
+                      [0.053, 8.66217],
+                      [0.0782, 8.64708],
+                      [0.1028, 8.63762],
+                      [0.1272, 8.63361],
+                      [0.1516, 8.63504],
+                      [0.1762, 8.64195],
+                      [0.2012, 8.65442],
+                      [0.2222, 8.6689],
+                      [0.244, 8.68752],
+                      [0.2666, 8.71029],
+                      [0.2906, 8.73782],
+                      [0.3352, 8.79598],
+                      [0.4154, 8.91028],
+                      [0.447, 8.95363],
+                      [0.4792, 8.99415],
+                      [0.5086, 9.02656],
+                      [0.5414, 9.05619],
+                      [0.5728, 9.077],
+                      [0.5882, 9.08425],
+                      [0.6034, 9.0894],
+                      [0.6186, 9.09251],
+                      [0.6338, 9.09356],
+                      [0.6494, 9.09247],
+                      [0.6652, 9.08914],
+                      [0.681, 9.08361],
+                      [0.6968, 9.07592],
+                      [0.713, 9.06588],
+                      [0.7294, 9.05359],
+                      [0.7634, 9.02185],
+                      [0.789, 8.99309],
+                      [0.8168, 8.95808],
+                      [0.8482, 8.91508],
+                      [0.9424, 8.78085],
+                      [0.9726, 8.74167],
+                      [1.0, 8.7099]
+                    ],
+                    "params": {
+                      "constant": 38.67185,
+                      "length_scale": 37.97082,
+                      "noise_level": 0.01211
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   }
 }
