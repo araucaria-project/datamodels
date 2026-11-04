@@ -67,6 +67,10 @@ Symbol = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}$"), AfterValidato
 #: ``dark`` and ``undefined`` share the shape so that a ``sees()`` result is one type.
 LightClass = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$")]
 
+#: The class a source *declares* it emits (``light: lamp.thar`` on a lamp): a family or a state
+#: within one, never a reserved word — dark and undefined are outcomes, not something a source is.
+SourceLightClass = Annotated[str, StringConstraints(pattern=rf"^{_IDENT}(\.{_IDENT})?$"), AfterValidator(_not_reserved), WithJsonSchema(_STATE_KEY_SCHEMA)]
+
 
 def _not_undefined(value: str) -> str:
     if value == UNDEFINED:
@@ -114,6 +118,16 @@ def light_state(light_class: str) -> str | None:
     """``sky.science`` -> ``science``; ``lamp`` -> ``None``."""
     _, _, state = light_class.partition(".")
     return state or None
+
+
+def light_satisfies(goal: str, light_class: str) -> bool:
+    """Does light of ``light_class`` satisfy a goal that asks for ``goal``? A goal naming a family
+    alone (``lamp``) accepts every state of it (``lamp.thar``, ``lamp.white``); a goal naming a
+    state (``lamp.thar``) accepts exactly that. Reserved words match only themselves. This is the
+    one matching rule every traversal (Python, TypeScript) applies."""
+    if goal in RESERVED_WORDS:
+        return light_class == goal
+    return light_class == goal or light_class.startswith(goal + ".")
 
 
 # --- closed vocabularies ---------------------------------------------------------------------

@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 
 from annotated_types import Len
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from datamodels.optics.vocabulary import CLOSED_STATE_KEYS, ComponentName, FunctionName, GoalClass, LightClass, StateKey, Symbol, VerdictKind
 
@@ -53,7 +53,8 @@ class Active(BaseModel):
 
 class Settable(BaseModel):
     """Not active, but these selector moves make it so. ``moves`` is the subset of ``positions``
-    that differs from the proven state."""
+    that differs from the proven state; ``confirm`` the moves that wait for a person's confirmation
+    before anything moves (the telescope and the dome to the flat screen; the covers by day)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -62,6 +63,14 @@ class Settable(BaseModel):
     positions: dict[StateKey, Symbol] = Field(json_schema_extra=CLOSED_STATE_KEYS)
     #: at least one move — with nothing to move the verdict would be ``active``
     moves: Annotated[dict[StateKey, Symbol], Len(min_length=1), Field(json_schema_extra=CLOSED_STATE_KEYS)]
+    confirm: tuple[StateKey, ...] = ()
+
+    @model_validator(mode="after")
+    def _confirm_is_a_move(self) -> "Settable":
+        stray = sorted(set(self.confirm) - set(self.moves))
+        if stray:
+            raise ValueError(f"confirm names {', '.join(stray)}, which are not moves")
+        return self
 
 
 class Collision(BaseModel):
@@ -80,7 +89,12 @@ class Collision(BaseModel):
 
 class Impossible(BaseModel):
     """No alternative of the goal can be provided now — typically the source class is
-    unavailable (``sky.science`` in daytime) or every path crosses an ``undefined`` selector."""
+    unavailable (``sky.science`` in daytime) or every path crosses an ``undefined`` selector.
+
+    ``awaits`` is the light that will come by itself (the sky's science light at dusk): the goal is
+    only *not yet* possible, and ``prepare`` holds the selector moves that make the path ready for
+    it — empty when it already is. A lamp or the flat screen never comes by itself, so it is never
+    awaited."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -88,6 +102,14 @@ class Impossible(BaseModel):
     reason: str
     unavailable: LightClass | None = None
     undefined_at: tuple[StateKey, ...] = ()
+    awaits: LightClass | None = None
+    prepare: dict[StateKey, Symbol] = Field(default_factory=dict, json_schema_extra=CLOSED_STATE_KEYS)
+
+    @model_validator(mode="after")
+    def _prepare_awaits(self) -> "Impossible":
+        if self.prepare and self.awaits is None:
+            raise ValueError("prepare without awaits: moves prepare a path only for light that will come")
+        return self
 
 
 class Invalid(BaseModel):

@@ -29,5 +29,7 @@ JsonBool = Annotated[bool, Strict()]
 #: A 0-based ordinal. The bound sits on the inner ``int`` so that it reaches the schema as ``minimum``
 #: (a constraint outside the before-validator would be emitted as an unknown ``ge`` keyword).
 Index = Annotated[int, Ge(0), BeforeValidator(_integral), Strict()]
+#: The serverish timestamp: ``[year, month, day, hour, minute, second, microsecond]``, UTC.
+Timestamp = tuple[JsonInteger, JsonInteger, JsonInteger, JsonInteger, JsonInteger, JsonInteger, JsonInteger]
 
-__all__ = ["JsonNumber", "JsonInteger", "JsonBool", "Index"]
+__all__ = ["JsonNumber", "JsonInteger", "JsonBool", "Index", "Timestamp"]
