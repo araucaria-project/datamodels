@@ -28,7 +28,7 @@ live in `[dependency-groups]` with `default-groups = ["dev"]` in `pyproject.toml
 
 ```bash
 uv sync                       # install/sync dependencies
-uv run pytest                 # run the full test suite (37 tests, <1s)
+uv run pytest                 # run the full test suite (171 tests, ~5s)
 uv run pytest tests/test_projects_overview.py::TestProjectsOverview::test_from_example_file  # single test
 uv run pytest -k measurement  # run tests matching a keyword
 uv run python tests/test_observation.py  # each test file has a __main__ block calling pytest.main
@@ -91,12 +91,31 @@ ProjectsOverview
       └── objects: dict[str, ObjectOverview]     # keyed by object id, e.g. "asassn-14cc"
             ├── name + display_name + status (all required)
             └── lc: dict[str, LightCurve]        # keyed by filter/passband, e.g. "u_s", "V"
-                  ├── name + display_name (required) / status (optional — None means "not set")
-                  └── file_name (optional) — plot file, {object}_{telescope}_{filter}_diff_ap_lc.png
+                  ├── name + display_name (required, = filter) / status (optional — None means "not set")
+                  ├── file_name (optional) — chart image, e.g. cs_eri_zb08c_r_ap-diff.lc.png
+                  ├── info: LcInfo | None           # light-curve data, None in the old (overview-only) shape
+                  │     ├── telescope + object + filter (required)
+                  │     └── prefix ("ap-diff"), lc_type ("diff"), method ("ap"), mag_type ("std" | "instr"),
+                  │         period, hjd0, re_rendered (datetime, ISO UTC) — all optional
+                  ├── measurements: list[LcMeasurement]   # {category, result}: snr, std, points, compare_stars
+                  └── models: list[LcModel]               # {category, result}; category = model class name,
+                                                          #   e.g. "GaussianProcessLightCurve"
 ```
 
-Unlike `observation.py`, `projects`/`objects`/`lc` are looked up directly by dict key (they're
-already keyed collections) — there are no `get_*` scan helpers here, and none are needed.
+`info` / `measurements` / `models` were added (2026-11) so the same `LightCurve` also describes the
+per-curve data file written by oca-fits-proc next to the chart (`<object>_<instr>_<filter>_<prefix>.lc.json`).
+Both shapes are valid: an overview-only `LightCurve` (name/display_name/status/file_name) gets `info=None`
+and empty lists. Note that `model_dump()` then emits `"info": null, "measurements": [], "models": []` —
+use `exclude_defaults=True` where the old byte shape matters. `measurements`/`models` mirror
+`Observation.measurements` (`{category, result: Any}`, `extra="allow"`).
+
+`projects`/`objects`/`lc` are looked up directly by dict key (they're already keyed collections).
+Only `LightCurve` has `get_measurement(category)` / `get_model(category)` scan helpers (async, like
+`Observation`'s), because its `measurements`/`models` are lists. `LcInfo`, `LcMeasurement`, `LcModel`
+are re-exported from `datamodels.projects_overview`; `tests/test_projects_overview.py` covers them
+(`TestLcInfo`, `TestLcMeasurement`, `TestLcModel`, `TestLightCurveData`) against the `binaries/cs_eri/r`
+entry of `examples/projects_overview_example.json`; the older test classes cover the overview-only shape
+and must keep passing unchanged.
 
 Every model here (`ProjectOverview`, `ObjectOverview`, `LightCurve`) carries a required `name`
 field that duplicates its key in the parent dict — set both, and keep them in sync.
